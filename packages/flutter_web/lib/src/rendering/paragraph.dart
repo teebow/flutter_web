@@ -53,28 +53,28 @@ class RenderParagraph extends RenderBox {
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     Locale locale,
     StrutStyle strutStyle,
-  })  : assert(text != null),
-        assert(text.debugAssertIsValid()),
-        assert(textAlign != null),
-        assert(textDirection != null),
-        assert(softWrap != null),
-        assert(overflow != null),
-        assert(textScaleFactor != null),
-        assert(maxLines == null || maxLines > 0),
-        assert(textWidthBasis != null),
-        _softWrap = softWrap,
-        _overflow = overflow,
-        _textPainter = TextPainter(
-          text: text,
-          textAlign: textAlign,
-          textDirection: textDirection,
-          textScaleFactor: textScaleFactor,
-          maxLines: maxLines,
-          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
-          locale: locale,
-          strutStyle: strutStyle,
-          textWidthBasis: textWidthBasis,
-        );
+  }) : assert(text != null),
+       assert(text.debugAssertIsValid()),
+       assert(textAlign != null),
+       assert(textDirection != null),
+       assert(softWrap != null),
+       assert(overflow != null),
+       assert(textScaleFactor != null),
+       assert(maxLines == null || maxLines > 0),
+       assert(textWidthBasis != null),
+       _softWrap = softWrap,
+       _overflow = overflow,
+       _textPainter = TextPainter(
+         text: text,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         textScaleFactor: textScaleFactor,
+         maxLines: maxLines,
+         ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
+         locale: locale,
+         strutStyle: strutStyle,
+         textWidthBasis: textWidthBasis,
+       );
 
   final TextPainter _textPainter;
 
@@ -103,7 +103,8 @@ class RenderParagraph extends RenderBox {
   TextAlign get textAlign => _textPainter.textAlign;
   set textAlign(TextAlign value) {
     assert(value != null);
-    if (_textPainter.textAlign == value) return;
+    if (_textPainter.textAlign == value)
+      return;
     _textPainter.textAlign = value;
     markNeedsPaint();
   }
@@ -124,7 +125,8 @@ class RenderParagraph extends RenderBox {
   TextDirection get textDirection => _textPainter.textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textPainter.textDirection == value) return;
+    if (_textPainter.textDirection == value)
+      return;
     _textPainter.textDirection = value;
     markNeedsLayout();
   }
@@ -140,7 +142,8 @@ class RenderParagraph extends RenderBox {
   bool _softWrap;
   set softWrap(bool value) {
     assert(value != null);
-    if (_softWrap == value) return;
+    if (_softWrap == value)
+      return;
     _softWrap = value;
     markNeedsLayout();
   }
@@ -150,7 +153,8 @@ class RenderParagraph extends RenderBox {
   TextOverflow _overflow;
   set overflow(TextOverflow value) {
     assert(value != null);
-    if (_overflow == value) return;
+    if (_overflow == value)
+      return;
     _overflow = value;
     _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
     markNeedsLayout();
@@ -163,7 +167,8 @@ class RenderParagraph extends RenderBox {
   double get textScaleFactor => _textPainter.textScaleFactor;
   set textScaleFactor(double value) {
     assert(value != null);
-    if (_textPainter.textScaleFactor == value) return;
+    if (_textPainter.textScaleFactor == value)
+      return;
     _textPainter.textScaleFactor = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -173,11 +178,11 @@ class RenderParagraph extends RenderBox {
   /// If the text exceeds the given number of lines, it will be truncated according
   /// to [overflow] and [softWrap].
   int get maxLines => _textPainter.maxLines;
-
   /// The value may be null. If it is not null, then it must be greater than zero.
   set maxLines(int value) {
     assert(value == null || value > 0);
-    if (_textPainter.maxLines == value) return;
+    if (_textPainter.maxLines == value)
+      return;
     _textPainter.maxLines = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -191,10 +196,10 @@ class RenderParagraph extends RenderBox {
   /// the Chinese and Japanese locales. In these cases the [locale] may be used
   /// to select a locale-specific font.
   Locale get locale => _textPainter.locale;
-
   /// The value may be null.
   set locale(Locale value) {
-    if (_textPainter.locale == value) return;
+    if (_textPainter.locale == value)
+      return;
     _textPainter.locale = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -202,10 +207,10 @@ class RenderParagraph extends RenderBox {
 
   /// {@macro flutter.painting.textPainter.strutStyle}
   StrutStyle get strutStyle => _textPainter.strutStyle;
-
   /// The value may be null.
   set strutStyle(StrutStyle value) {
-    if (_textPainter.strutStyle == value) return;
+    if (_textPainter.strutStyle == value)
+      return;
     _textPainter.strutStyle = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -215,17 +220,16 @@ class RenderParagraph extends RenderBox {
   TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {
     assert(value != null);
-    if (_textPainter.textWidthBasis == value) return;
+    if (_textPainter.textWidthBasis == value)
+      return;
     _textPainter.textWidthBasis = value;
     _overflowShader = null;
     markNeedsLayout();
   }
 
-  void _layoutText({double minWidth = 0.0, double maxWidth = double.infinity}) {
+  void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
-    _textPainter.layout(
-        minWidth: minWidth,
-        maxWidth: widthMatters ? maxWidth : double.infinity);
+    _textPainter.layout(minWidth: minWidth, maxWidth: widthMatters ? maxWidth : double.infinity);
   }
 
   void _layoutTextWithConstraints(BoxConstraints constraints) {
@@ -274,7 +278,8 @@ class RenderParagraph extends RenderBox {
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    if (event is! PointerDownEvent) return;
+    if (event is! PointerDownEvent)
+      return;
     _layoutTextWithConstraints(constraints);
     final Offset offset = entry.localPosition;
     final TextPosition position = _textPainter.getPositionForOffset(offset);
@@ -304,8 +309,7 @@ class RenderParagraph extends RenderBox {
     final bool textDidExceedMaxLines = _textPainter.didExceedMaxLines;
     size = constraints.constrain(textSize);
 
-    final bool didOverflowHeight =
-        size.height < textSize.height || textDidExceedMaxLines;
+    final bool didOverflowHeight = size.height < textSize.height || textDidExceedMaxLines;
     final bool didOverflowWidth = size.width < textSize.width;
     // TODO(abarth): We're only measuring the sizes of the line boxes here. If
     // the glyphs draw outside the line boxes, we might think that there isn't
@@ -384,7 +388,8 @@ class RenderParagraph extends RenderBox {
 
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
-        final Paint paint = Paint()..color = debugCurrentRepaintColor.toColor();
+        final Paint paint = Paint()
+          ..color = debugCurrentRepaintColor.toColor();
         canvas.drawRect(offset & size, paint);
       }
       return true;
@@ -484,9 +489,7 @@ class RenderParagraph extends RenderBox {
     _recognizers.clear();
     int offset = 0;
     text.visitTextSpan((TextSpan span) {
-      if (span.recognizer != null &&
-          (span.recognizer is TapGestureRecognizer ||
-              span.recognizer is LongPressGestureRecognizer)) {
+      if (span.recognizer != null && (span.recognizer is TapGestureRecognizer || span.recognizer is LongPressGestureRecognizer)) {
         final int length = span.semanticsLabel?.length ?? span.text.length;
         _recognizerOffsets.add(offset);
         _recognizerOffsets.add(offset + length);
@@ -505,8 +508,7 @@ class RenderParagraph extends RenderBox {
   }
 
   @override
-  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config,
-      Iterable<SemanticsNode> children) {
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
     assert(_recognizerOffsets.isNotEmpty);
     assert(_recognizerOffsets.length.isEven);
     assert(_recognizers.isNotEmpty);
@@ -520,8 +522,7 @@ class RenderParagraph extends RenderBox {
 
     SemanticsConfiguration buildSemanticsConfig(int start, int end) {
       final TextDirection initialDirection = currentDirection;
-      final TextSelection selection =
-          TextSelection(baseOffset: start, extentOffset: end);
+      final TextSelection selection = TextSelection(baseOffset: start, extentOffset: end);
       final List<ui.TextBox> rects = getBoxesForSelection(selection);
       Rect rect;
       for (ui.TextBox textBox in rects) {
@@ -550,15 +551,13 @@ class RenderParagraph extends RenderBox {
       final int end = _recognizerOffsets[i + 1];
       if (current != start) {
         final SemanticsNode node = SemanticsNode();
-        final SemanticsConfiguration configuration =
-            buildSemanticsConfig(current, start);
+        final SemanticsConfiguration configuration = buildSemanticsConfig(current, start);
         node.updateWith(config: configuration);
         node.rect = currentRect;
         newChildren.add(node);
       }
       final SemanticsNode node = SemanticsNode();
-      final SemanticsConfiguration configuration =
-          buildSemanticsConfig(start, end);
+      final SemanticsConfiguration configuration = buildSemanticsConfig(start, end);
       final GestureRecognizer recognizer = _recognizers[j];
       if (recognizer is TapGestureRecognizer) {
         configuration.onTap = recognizer.onTap;
@@ -574,8 +573,7 @@ class RenderParagraph extends RenderBox {
     }
     if (current < rawLabel.length) {
       final SemanticsNode node = SemanticsNode();
-      final SemanticsConfiguration configuration =
-          buildSemanticsConfig(current, rawLabel.length);
+      final SemanticsConfiguration configuration = buildSemanticsConfig(current, rawLabel.length);
       node.updateWith(config: configuration);
       node.rect = currentRect;
       newChildren.add(node);
@@ -585,10 +583,7 @@ class RenderParagraph extends RenderBox {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return <DiagnosticsNode>[
-      text.toDiagnosticsNode(
-          name: 'text', style: DiagnosticsTreeStyle.transition)
-    ];
+    return <DiagnosticsNode>[text.toDiagnosticsNode(name: 'text', style: DiagnosticsTreeStyle.transition)];
   }
 
   @override
@@ -596,16 +591,10 @@ class RenderParagraph extends RenderBox {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection));
-    properties.add(FlagProperty('softWrap',
-        value: softWrap,
-        ifTrue: 'wrapping at box width',
-        ifFalse: 'no wrapping except at line break characters',
-        showName: true));
+    properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow));
-    properties.add(
-        DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
-    properties
-        .add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
+    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
+    properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
   }
 }

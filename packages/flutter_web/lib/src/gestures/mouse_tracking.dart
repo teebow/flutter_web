@@ -5,8 +5,7 @@
 
 import 'package:flutter_web_ui/ui.dart';
 
-import 'package:flutter_web/foundation.dart'
-    show visibleForTesting, ChangeNotifier;
+import 'package:flutter_web/foundation.dart' show visibleForTesting, ChangeNotifier;
 import 'package:flutter_web/scheduler.dart';
 
 import 'events.dart';
@@ -50,8 +49,7 @@ class MouseTrackerAnnotation {
 
   @override
   String toString() {
-    final String none =
-        (onEnter == null && onExit == null && onHover == null) ? ' <none>' : '';
+    final String none = (onEnter == null && onExit == null && onHover == null) ? ' <none>' : '';
     return '[$runtimeType${hashCode.toRadixString(16)}$none'
         '${onEnter == null ? '' : ' onEnter'}'
         '${onHover == null ? '' : ' onHover'}'
@@ -81,8 +79,7 @@ class _TrackedAnnotation {
 ///
 /// It is used by the [MouseTracker] to fetch annotations for the mouse
 /// position.
-typedef MouseDetectorAnnotationFinder = Iterable<MouseTrackerAnnotation>
-    Function(Offset offset);
+typedef MouseDetectorAnnotationFinder = Iterable<MouseTrackerAnnotation> Function(Offset offset);
 
 /// Keeps state about which objects are interested in tracking mouse positions
 /// and notifies them when a mouse pointer enters, moves, or leaves an annotated
@@ -107,8 +104,7 @@ class MouseTracker extends ChangeNotifier {
 
   // The collection of annotations that are currently being tracked. They may or
   // may not be active, depending on the value of _TrackedAnnotation.active.
-  final Map<MouseTrackerAnnotation, _TrackedAnnotation> _trackedAnnotations =
-      <MouseTrackerAnnotation, _TrackedAnnotation>{};
+  final Map<MouseTrackerAnnotation, _TrackedAnnotation> _trackedAnnotations = <MouseTrackerAnnotation, _TrackedAnnotation>{};
 
   /// Track an annotation so that if the mouse enters it, we send it events.
   ///
@@ -130,8 +126,7 @@ class MouseTracker extends ChangeNotifier {
     final _TrackedAnnotation trackedAnnotation = _findAnnotation(annotation);
     for (int deviceId in trackedAnnotation.activeDevices) {
       if (annotation.onExit != null) {
-        annotation
-            .onExit(PointerExitEvent.fromMouseEvent(_lastMouseEvent[deviceId]));
+        annotation.onExit(PointerExitEvent.fromMouseEvent(_lastMouseEvent[deviceId]));
       }
     }
     _trackedAnnotations.remove(annotation);
@@ -168,11 +163,8 @@ class MouseTracker extends ChangeNotifier {
       // exit any annotations that were active.
       _scheduleMousePositionCheck();
     } else {
-      if (event is PointerMoveEvent ||
-          event is PointerHoverEvent ||
-          event is PointerDownEvent) {
-        if (!_lastMouseEvent.containsKey(deviceId) ||
-            _lastMouseEvent[deviceId].position != event.position) {
+      if (event is PointerMoveEvent || event is PointerHoverEvent || event is PointerDownEvent) {
+        if (!_lastMouseEvent.containsKey(deviceId) || _lastMouseEvent[deviceId].position != event.position) {
           // Only schedule a frame if we have our first event, or if the
           // location of the mouse has changed, and only if there are tracked annotations.
           _scheduleMousePositionCheck();
@@ -183,8 +175,7 @@ class MouseTracker extends ChangeNotifier {
   }
 
   _TrackedAnnotation _findAnnotation(MouseTrackerAnnotation annotation) {
-    final _TrackedAnnotation trackedAnnotation =
-        _trackedAnnotations[annotation];
+    final _TrackedAnnotation trackedAnnotation = _trackedAnnotations[annotation];
     assert(
         trackedAnnotation != null,
         'Unable to find annotation $annotation in tracked annotations. '
@@ -214,10 +205,8 @@ class MouseTracker extends ChangeNotifier {
   @visibleForTesting
   void collectMousePositions() {
     void exitAnnotation(_TrackedAnnotation trackedAnnotation, int deviceId) {
-      if (trackedAnnotation.annotation?.onExit != null &&
-          trackedAnnotation.activeDevices.contains(deviceId)) {
-        trackedAnnotation.annotation
-            .onExit(PointerExitEvent.fromMouseEvent(_lastMouseEvent[deviceId]));
+      if (trackedAnnotation.annotation?.onExit != null && trackedAnnotation.activeDevices.contains(deviceId)) {
+        trackedAnnotation.annotation.onExit(PointerExitEvent.fromMouseEvent(_lastMouseEvent[deviceId]));
         trackedAnnotation.activeDevices.remove(deviceId);
       }
     }
@@ -241,50 +230,41 @@ class MouseTracker extends ChangeNotifier {
 
     for (int deviceId in _lastMouseEvent.keys) {
       final PointerEvent lastEvent = _lastMouseEvent[deviceId];
-      final Iterable<MouseTrackerAnnotation> hits =
-          annotationFinder(lastEvent.position);
+      final Iterable<MouseTrackerAnnotation> hits = annotationFinder(lastEvent.position);
 
       // No annotations were found at this position for this deviceId, so send an
       // exit to all active tracked annotations, since none of them were hit.
       if (hits.isEmpty) {
         // Send an exit to all tracked animations tracking this deviceId.
-        for (_TrackedAnnotation trackedAnnotation
-            in _trackedAnnotations.values) {
+        for (_TrackedAnnotation trackedAnnotation in _trackedAnnotations.values) {
           exitAnnotation(trackedAnnotation, deviceId);
         }
         continue;
       }
 
-      final Set<_TrackedAnnotation> hitAnnotations = hits
-          .map<_TrackedAnnotation>(
-              (MouseTrackerAnnotation hit) => _findAnnotation(hit))
-          .toSet();
+      final Set<_TrackedAnnotation> hitAnnotations = hits.map<_TrackedAnnotation>((MouseTrackerAnnotation hit) => _findAnnotation(hit)).toSet();
       for (_TrackedAnnotation hitAnnotation in hitAnnotations) {
         if (!hitAnnotation.activeDevices.contains(deviceId)) {
           // A tracked annotation that just became active and needs to have an enter
           // event sent to it.
           hitAnnotation.activeDevices.add(deviceId);
           if (hitAnnotation.annotation?.onEnter != null) {
-            hitAnnotation.annotation
-                .onEnter(PointerEnterEvent.fromMouseEvent(lastEvent));
+            hitAnnotation.annotation.onEnter(PointerEnterEvent.fromMouseEvent(lastEvent));
           }
         }
-        if (hitAnnotation.annotation?.onHover != null &&
-            lastEvent is PointerHoverEvent) {
+        if (hitAnnotation.annotation?.onHover != null && lastEvent is PointerHoverEvent) {
           hitAnnotation.annotation.onHover(lastEvent);
         }
 
         // Tell any tracked annotations that weren't hit that they are no longer
         // active.
-        for (_TrackedAnnotation trackedAnnotation
-            in _trackedAnnotations.values) {
+        for (_TrackedAnnotation trackedAnnotation in _trackedAnnotations.values) {
           if (hitAnnotations.contains(trackedAnnotation)) {
             continue;
           }
           if (trackedAnnotation.activeDevices.contains(deviceId)) {
             if (trackedAnnotation.annotation?.onExit != null) {
-              trackedAnnotation.annotation
-                  .onExit(PointerExitEvent.fromMouseEvent(lastEvent));
+              trackedAnnotation.annotation.onExit(PointerExitEvent.fromMouseEvent(lastEvent));
             }
             trackedAnnotation.activeDevices.remove(deviceId);
           }

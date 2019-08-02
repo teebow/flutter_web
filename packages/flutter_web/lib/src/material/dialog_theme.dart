@@ -97,8 +97,7 @@ class DialogTheme extends Diagnosticable {
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
-      contentTextStyle:
-          TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
+      contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
     );
   }
 
@@ -107,29 +106,25 @@ class DialogTheme extends Diagnosticable {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
     final DialogTheme typedOther = other;
-    return typedOther.backgroundColor == backgroundColor &&
-        typedOther.elevation == elevation &&
-        typedOther.shape == shape &&
-        typedOther.titleTextStyle == titleTextStyle &&
-        typedOther.contentTextStyle == contentTextStyle;
+    return typedOther.backgroundColor == backgroundColor
+        && typedOther.elevation == elevation
+        && typedOther.shape == shape
+        && typedOther.titleTextStyle == titleTextStyle
+        && typedOther.contentTextStyle == contentTextStyle;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-        .add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor));
-    properties.add(
-        DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation));
-    properties.add(DiagnosticsProperty<TextStyle>(
-        'titleTextStyle', titleTextStyle,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>(
-        'contentTextStyle', contentTextStyle,
-        defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
   }
 }

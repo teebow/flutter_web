@@ -231,7 +231,7 @@ Matcher moreOrLessEquals(double value, {double epsilon = 1e-10}) {
 ///  * [moreOrLessEquals], which is for [double]s.
 ///  * [within], which offers a generic version of this functionality that can
 ///    be used to match [Rect]s as well as other types.
-Matcher rectMoreOrLessEquals(Rect value, {double epsilon = 1e-10}) {
+Matcher rectMoreOrLessEquals(Rect value, { double epsilon = 1e-10 }) {
   return _IsWithinDistance<Rect>(_rectDistance, value, epsilon);
 }
 
@@ -761,10 +761,8 @@ class _EqualsIgnoringHashCodes extends Matcher {
         const int snippetLength = 20;
         int len = math.min(
             math.min(valueLength - i, actualLength - i), snippetLength);
-        String before =
-            _EqualsIgnoringHashCodes._normalize(_value.substring(i, i + len));
-        String after = _EqualsIgnoringHashCodes._normalize(
-            actualValue.substring(i, i + len));
+        String before = _EqualsIgnoringHashCodes._normalize(_value.substring(i, i + len));
+        String after = _EqualsIgnoringHashCodes._normalize(actualValue.substring(i, i + len));
         mismatchDescription.add('Mismatch at offset $i '
             '[$before] => '
             '[$after]');

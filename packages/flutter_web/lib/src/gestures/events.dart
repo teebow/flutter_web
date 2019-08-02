@@ -121,8 +121,7 @@ const int kTouchContact = kPrimaryButton;
 /// See [kPrimaryMouseButton], [kSecondaryMouseButton], [kMiddleMouseButton],
 /// [kBackMouseButton], and [kForwardMouseButton] for semantic names for some
 /// mouse buttons.
-int nthMouseButton(int number) =>
-    (kPrimaryMouseButton << (number - 1)) & kMaxUnsignedSMI;
+int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUnsignedSMI;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the nth stylus button.
 ///
@@ -130,8 +129,7 @@ int nthMouseButton(int number) =>
 ///
 /// See [kPrimaryStylusButton] and [kSecondaryStylusButton] for semantic names
 /// for some stylus buttons.
-int nthStylusButton(int number) =>
-    (kPrimaryStylusButton << (number - 1)) & kMaxUnsignedSMI;
+int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMaxUnsignedSMI;
 
 /// Returns the button of `buttons` with the smallest integer.
 ///
@@ -172,8 +170,7 @@ int smallestButton(int buttons) => buttons & (-buttons);
 ///
 ///   * [smallestButton], which returns the button in a `buttons` bitfield with
 ///     the smallest integer button.
-bool isSingleButton(int buttons) =>
-    buttons != 0 && (smallestButton(buttons) == buttons);
+bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == buttons);
 
 /// Base class for touch, stylus, or mouse events.
 ///
@@ -398,54 +395,29 @@ abstract class PointerEvent extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('position', position));
-    properties.add(DiagnosticsProperty<Offset>('delta', delta,
-        defaultValue: Offset.zero, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<Duration>('timeStamp', timeStamp,
-        defaultValue: Duration.zero, level: DiagnosticLevel.debug));
-    properties
-        .add(IntProperty('pointer', pointer, level: DiagnosticLevel.debug));
-    properties.add(EnumProperty<PointerDeviceKind>('kind', kind,
-        level: DiagnosticLevel.debug));
-    properties.add(IntProperty('device', device,
-        defaultValue: 0, level: DiagnosticLevel.debug));
-    properties.add(IntProperty('buttons', buttons,
-        defaultValue: 0, level: DiagnosticLevel.debug));
-    properties.add(
-        DiagnosticsProperty<bool>('down', down, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('pressure', pressure,
-        defaultValue: 1.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('pressureMin', pressureMin,
-        defaultValue: 1.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('pressureMax', pressureMax,
-        defaultValue: 1.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('distance', distance,
-        defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('distanceMin', distanceMin,
-        defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('distanceMax', distanceMax,
-        defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('size', size,
-        defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('radiusMajor', radiusMajor,
-        defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('radiusMinor', radiusMinor,
-        defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('radiusMin', radiusMin,
-        defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('radiusMax', radiusMax,
-        defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('orientation', orientation,
-        defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(DoubleProperty('tilt', tilt,
-        defaultValue: 0.0, level: DiagnosticLevel.debug));
-    properties.add(IntProperty('platformData', platformData,
-        defaultValue: 0, level: DiagnosticLevel.debug));
-    properties.add(FlagProperty('obscured',
-        value: obscured, ifTrue: 'obscured', level: DiagnosticLevel.debug));
-    properties.add(FlagProperty('synthesized',
-        value: synthesized,
-        ifTrue: 'synthesized',
-        level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Offset>('delta', delta, defaultValue: Offset.zero, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Duration>('timeStamp', timeStamp, defaultValue: Duration.zero, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('pointer', pointer, level: DiagnosticLevel.debug));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('device', device, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('buttons', buttons, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<bool>('down', down, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressure', pressure, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressureMin', pressureMin, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressureMax', pressureMax, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distance', distance, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distanceMin', distanceMin, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distanceMax', distanceMax, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('size', size, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMajor', radiusMajor, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMinor', radiusMinor, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMin', radiusMin, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMax', radiusMax, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('orientation', orientation, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('tilt', tilt, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('platformData', platformData, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(FlagProperty('obscured', value: obscured, ifTrue: 'obscured', level: DiagnosticLevel.debug));
+    properties.add(FlagProperty('synthesized', value: synthesized, ifTrue: 'synthesized', level: DiagnosticLevel.debug));
   }
 
   /// Returns a complete textual description of this event.
@@ -477,21 +449,21 @@ class PointerAddedEvent extends PointerEvent {
     double orientation = 0.0,
     double tilt = 0.0,
   }) : super(
-          timeStamp: timeStamp,
-          kind: kind,
-          device: device,
-          position: position,
-          obscured: obscured,
-          pressure: 0.0,
-          pressureMin: pressureMin,
-          pressureMax: pressureMax,
-          distance: distance,
-          distanceMax: distanceMax,
-          radiusMin: radiusMin,
-          radiusMax: radiusMax,
-          orientation: orientation,
-          tilt: tilt,
-        );
+         timeStamp: timeStamp,
+         kind: kind,
+         device: device,
+         position: position,
+         obscured: obscured,
+         pressure: 0.0,
+         pressureMin: pressureMin,
+         pressureMax: pressureMax,
+         distance: distance,
+         distanceMax: distanceMax,
+         radiusMin: radiusMin,
+         radiusMax: radiusMax,
+         orientation: orientation,
+         tilt: tilt,
+       );
 }
 
 /// The device is no longer tracking the pointer.
@@ -514,18 +486,18 @@ class PointerRemovedEvent extends PointerEvent {
     double radiusMin = 0.0,
     double radiusMax = 0.0,
   }) : super(
-          timeStamp: timeStamp,
-          kind: kind,
-          device: device,
-          position: position,
-          obscured: obscured,
-          pressure: 0.0,
-          pressureMin: pressureMin,
-          pressureMax: pressureMax,
-          distanceMax: distanceMax,
-          radiusMin: radiusMin,
-          radiusMax: radiusMax,
-        );
+         timeStamp: timeStamp,
+         kind: kind,
+         device: device,
+         position: position,
+         obscured: obscured,
+         pressure: 0.0,
+         pressureMin: pressureMin,
+         pressureMax: pressureMax,
+         distanceMax: distanceMax,
+         radiusMin: radiusMin,
+         radiusMax: radiusMax,
+       );
 }
 
 /// The pointer has moved with respect to the device while the pointer is not
@@ -563,28 +535,28 @@ class PointerHoverEvent extends PointerEvent {
     double tilt = 0.0,
     bool synthesized = false,
   }) : super(
-          timeStamp: timeStamp,
-          kind: kind,
-          device: device,
-          position: position,
-          delta: delta,
-          buttons: buttons,
-          down: false,
-          obscured: obscured,
-          pressure: 0.0,
-          pressureMin: pressureMin,
-          pressureMax: pressureMax,
-          distance: distance,
-          distanceMax: distanceMax,
-          size: size,
-          radiusMajor: radiusMajor,
-          radiusMinor: radiusMinor,
-          radiusMin: radiusMin,
-          radiusMax: radiusMax,
-          orientation: orientation,
-          tilt: tilt,
-          synthesized: synthesized,
-        );
+         timeStamp: timeStamp,
+         kind: kind,
+         device: device,
+         position: position,
+         delta: delta,
+         buttons: buttons,
+         down: false,
+         obscured: obscured,
+         pressure: 0.0,
+         pressureMin: pressureMin,
+         pressureMax: pressureMax,
+         distance: distance,
+         distanceMax: distanceMax,
+         size: size,
+         radiusMajor: radiusMajor,
+         radiusMinor: radiusMinor,
+         radiusMin: radiusMin,
+         radiusMax: radiusMax,
+         orientation: orientation,
+         tilt: tilt,
+         synthesized: synthesized,
+       );
 }
 
 /// The pointer has moved with respect to the device while the pointer is not
@@ -622,61 +594,59 @@ class PointerEnterEvent extends PointerEvent {
     double tilt = 0.0,
     bool synthesized = false,
   }) : super(
-          timeStamp: timeStamp,
-          kind: kind,
-          device: device,
-          position: position,
-          delta: delta,
-          buttons: buttons,
-          down: false,
-          obscured: obscured,
-          pressure: 0.0,
-          pressureMin: pressureMin,
-          pressureMax: pressureMax,
-          distance: distance,
-          distanceMax: distanceMax,
-          size: size,
-          radiusMajor: radiusMajor,
-          radiusMinor: radiusMinor,
-          radiusMin: radiusMin,
-          radiusMax: radiusMax,
-          orientation: orientation,
-          tilt: tilt,
-          synthesized: synthesized,
-        );
+         timeStamp: timeStamp,
+         kind: kind,
+         device: device,
+         position: position,
+         delta: delta,
+         buttons: buttons,
+         down: false,
+         obscured: obscured,
+         pressure: 0.0,
+         pressureMin: pressureMin,
+         pressureMax: pressureMax,
+         distance: distance,
+         distanceMax: distanceMax,
+         size: size,
+         radiusMajor: radiusMajor,
+         radiusMinor: radiusMinor,
+         radiusMin: radiusMin,
+         radiusMax: radiusMax,
+         orientation: orientation,
+         tilt: tilt,
+         synthesized: synthesized,
+       );
 
   /// Creates an enter event from a [PointerHoverEvent].
   ///
   /// Deprecated. Please use [PointerEnterEvent.fromMouseEvent] instead.
   @Deprecated('use PointerEnterEvent.fromMouseEvent instead')
-  PointerEnterEvent.fromHoverEvent(PointerHoverEvent event)
-      : this.fromMouseEvent(event);
+  PointerEnterEvent.fromHoverEvent(PointerHoverEvent event) : this.fromMouseEvent(event);
 
   /// Creates an enter event from a [PointerEvent].
   ///
   /// This is used by the [MouseTracker] to synthesize enter events.
-  PointerEnterEvent.fromMouseEvent(PointerEvent event)
-      : this(
-          timeStamp: event?.timeStamp,
-          kind: event?.kind,
-          device: event?.device,
-          position: event?.position,
-          delta: event?.delta,
-          buttons: event?.buttons,
-          obscured: event?.obscured,
-          pressureMin: event?.pressureMin,
-          pressureMax: event?.pressureMax,
-          distance: event?.distance,
-          distanceMax: event?.distanceMax,
-          size: event?.size,
-          radiusMajor: event?.radiusMajor,
-          radiusMinor: event?.radiusMinor,
-          radiusMin: event?.radiusMin,
-          radiusMax: event?.radiusMax,
-          orientation: event?.orientation,
-          tilt: event?.tilt,
-          synthesized: event?.synthesized,
-        );
+  PointerEnterEvent.fromMouseEvent(PointerEvent event) : this(
+    timeStamp: event?.timeStamp,
+    kind: event?.kind,
+    device: event?.device,
+    position: event?.position,
+    delta: event?.delta,
+    buttons: event?.buttons,
+    obscured: event?.obscured,
+    pressureMin: event?.pressureMin,
+    pressureMax: event?.pressureMax,
+    distance: event?.distance,
+    distanceMax: event?.distanceMax,
+    size: event?.size,
+    radiusMajor: event?.radiusMajor,
+    radiusMinor: event?.radiusMinor,
+    radiusMin: event?.radiusMin,
+    radiusMax: event?.radiusMax,
+    orientation: event?.orientation,
+    tilt: event?.tilt,
+    synthesized: event?.synthesized,
+  );
 }
 
 /// The pointer has moved with respect to the device while the pointer is not
@@ -714,61 +684,59 @@ class PointerExitEvent extends PointerEvent {
     double tilt = 0.0,
     bool synthesized = false,
   }) : super(
-          timeStamp: timeStamp,
-          kind: kind,
-          device: device,
-          position: position,
-          delta: delta,
-          buttons: buttons,
-          down: false,
-          obscured: obscured,
-          pressure: 0.0,
-          pressureMin: pressureMin,
-          pressureMax: pressureMax,
-          distance: distance,
-          distanceMax: distanceMax,
-          size: size,
-          radiusMajor: radiusMajor,
-          radiusMinor: radiusMinor,
-          radiusMin: radiusMin,
-          radiusMax: radiusMax,
-          orientation: orientation,
-          tilt: tilt,
-          synthesized: synthesized,
-        );
+         timeStamp: timeStamp,
+         kind: kind,
+         device: device,
+         position: position,
+         delta: delta,
+         buttons: buttons,
+         down: false,
+         obscured: obscured,
+         pressure: 0.0,
+         pressureMin: pressureMin,
+         pressureMax: pressureMax,
+         distance: distance,
+         distanceMax: distanceMax,
+         size: size,
+         radiusMajor: radiusMajor,
+         radiusMinor: radiusMinor,
+         radiusMin: radiusMin,
+         radiusMax: radiusMax,
+         orientation: orientation,
+         tilt: tilt,
+         synthesized: synthesized,
+       );
 
   /// Creates an exit event from a [PointerHoverEvent].
   ///
   /// Deprecated. Please use [PointerExitEvent.fromMouseEvent] instead.
   @Deprecated('use PointerExitEvent.fromMouseEvent instead')
-  PointerExitEvent.fromHoverEvent(PointerHoverEvent event)
-      : this.fromMouseEvent(event);
+  PointerExitEvent.fromHoverEvent(PointerHoverEvent event) : this.fromMouseEvent(event);
 
   /// Creates an exit event from a [PointerEvent].
   ///
   /// This is used by the [MouseTracker] to synthesize exit events.
-  PointerExitEvent.fromMouseEvent(PointerEvent event)
-      : this(
-          timeStamp: event?.timeStamp,
-          kind: event?.kind,
-          device: event?.device,
-          position: event?.position,
-          delta: event?.delta,
-          buttons: event?.buttons,
-          obscured: event?.obscured,
-          pressureMin: event?.pressureMin,
-          pressureMax: event?.pressureMax,
-          distance: event?.distance,
-          distanceMax: event?.distanceMax,
-          size: event?.size,
-          radiusMajor: event?.radiusMajor,
-          radiusMinor: event?.radiusMinor,
-          radiusMin: event?.radiusMin,
-          radiusMax: event?.radiusMax,
-          orientation: event?.orientation,
-          tilt: event?.tilt,
-          synthesized: event?.synthesized,
-        );
+  PointerExitEvent.fromMouseEvent(PointerEvent event) : this(
+    timeStamp: event?.timeStamp,
+    kind: event?.kind,
+    device: event?.device,
+    position: event?.position,
+    delta: event?.delta,
+    buttons: event?.buttons,
+    obscured: event?.obscured,
+    pressureMin: event?.pressureMin,
+    pressureMax: event?.pressureMax,
+    distance: event?.distance,
+    distanceMax: event?.distanceMax,
+    size: event?.size,
+    radiusMajor: event?.radiusMajor,
+    radiusMinor: event?.radiusMinor,
+    radiusMin: event?.radiusMin,
+    radiusMax: event?.radiusMax,
+    orientation: event?.orientation,
+    tilt: event?.tilt,
+    synthesized: event?.synthesized,
+  );
 }
 
 /// The pointer has made contact with the device.
@@ -796,27 +764,27 @@ class PointerDownEvent extends PointerEvent {
     double orientation = 0.0,
     double tilt = 0.0,
   }) : super(
-          timeStamp: timeStamp,
-          pointer: pointer,
-          kind: kind,
-          device: device,
-          position: position,
-          buttons: buttons,
-          down: true,
-          obscured: obscured,
-          pressure: pressure,
-          pressureMin: pressureMin,
-          pressureMax: pressureMax,
-          distance: 0.0,
-          distanceMax: distanceMax,
-          size: size,
-          radiusMajor: radiusMajor,
-          radiusMinor: radiusMinor,
-          radiusMin: radiusMin,
-          radiusMax: radiusMax,
-          orientation: orientation,
-          tilt: tilt,
-        );
+         timeStamp: timeStamp,
+         pointer: pointer,
+         kind: kind,
+         device: device,
+         position: position,
+         buttons: buttons,
+         down: true,
+         obscured: obscured,
+         pressure: pressure,
+         pressureMin: pressureMin,
+         pressureMax: pressureMax,
+         distance: 0.0,
+         distanceMax: distanceMax,
+         size: size,
+         radiusMajor: radiusMajor,
+         radiusMinor: radiusMinor,
+         radiusMin: radiusMin,
+         radiusMax: radiusMax,
+         orientation: orientation,
+         tilt: tilt,
+       );
 }
 
 /// The pointer has moved with respect to the device while the pointer is in
@@ -853,30 +821,30 @@ class PointerMoveEvent extends PointerEvent {
     int platformData = 0,
     bool synthesized = false,
   }) : super(
-          timeStamp: timeStamp,
-          pointer: pointer,
-          kind: kind,
-          device: device,
-          position: position,
-          delta: delta,
-          buttons: buttons,
-          down: true,
-          obscured: obscured,
-          pressure: pressure,
-          pressureMin: pressureMin,
-          pressureMax: pressureMax,
-          distance: 0.0,
-          distanceMax: distanceMax,
-          size: size,
-          radiusMajor: radiusMajor,
-          radiusMinor: radiusMinor,
-          radiusMin: radiusMin,
-          radiusMax: radiusMax,
-          orientation: orientation,
-          tilt: tilt,
-          platformData: platformData,
-          synthesized: synthesized,
-        );
+         timeStamp: timeStamp,
+         pointer: pointer,
+         kind: kind,
+         device: device,
+         position: position,
+         delta: delta,
+         buttons: buttons,
+         down: true,
+         obscured: obscured,
+         pressure: pressure,
+         pressureMin: pressureMin,
+         pressureMax: pressureMax,
+         distance: 0.0,
+         distanceMax: distanceMax,
+         size: size,
+         radiusMajor: radiusMajor,
+         radiusMinor: radiusMinor,
+         radiusMin: radiusMin,
+         radiusMax: radiusMax,
+         orientation: orientation,
+         tilt: tilt,
+         platformData: platformData,
+         synthesized: synthesized,
+       );
 }
 
 /// The pointer has stopped making contact with the device.
@@ -907,27 +875,27 @@ class PointerUpEvent extends PointerEvent {
     double orientation = 0.0,
     double tilt = 0.0,
   }) : super(
-          timeStamp: timeStamp,
-          pointer: pointer,
-          kind: kind,
-          device: device,
-          position: position,
-          buttons: buttons,
-          down: false,
-          obscured: obscured,
-          pressure: pressure,
-          pressureMin: pressureMin,
-          pressureMax: pressureMax,
-          distance: distance,
-          distanceMax: distanceMax,
-          size: size,
-          radiusMajor: radiusMajor,
-          radiusMinor: radiusMinor,
-          radiusMin: radiusMin,
-          radiusMax: radiusMax,
-          orientation: orientation,
-          tilt: tilt,
-        );
+         timeStamp: timeStamp,
+         pointer: pointer,
+         kind: kind,
+         device: device,
+         position: position,
+         buttons: buttons,
+         down: false,
+         obscured: obscured,
+         pressure: pressure,
+         pressureMin: pressureMin,
+         pressureMax: pressureMax,
+         distance: distance,
+         distanceMax: distanceMax,
+         size: size,
+         radiusMajor: radiusMajor,
+         radiusMinor: radiusMinor,
+         radiusMin: radiusMin,
+         radiusMax: radiusMax,
+         orientation: orientation,
+         tilt: tilt,
+       );
 }
 
 /// An event that corresponds to a discrete pointer signal.
@@ -945,12 +913,12 @@ abstract class PointerSignalEvent extends PointerEvent {
     int device = 0,
     Offset position = Offset.zero,
   }) : super(
-          timeStamp: timeStamp,
-          pointer: pointer,
-          kind: kind,
-          device: device,
-          position: position,
-        );
+         timeStamp: timeStamp,
+         pointer: pointer,
+         kind: kind,
+         device: device,
+         position: position,
+       );
 }
 
 /// The pointer issued a scroll event.
@@ -967,17 +935,17 @@ class PointerScrollEvent extends PointerSignalEvent {
     int device = 0,
     Offset position = Offset.zero,
     this.scrollDelta = Offset.zero,
-  })  : assert(timeStamp != null),
-        assert(kind != null),
-        assert(device != null),
-        assert(position != null),
-        assert(scrollDelta != null),
-        super(
-          timeStamp: timeStamp,
-          kind: kind,
-          device: device,
-          position: position,
-        );
+  }) : assert(timeStamp != null),
+       assert(kind != null),
+       assert(device != null),
+       assert(position != null),
+       assert(scrollDelta != null),
+       super(
+         timeStamp: timeStamp,
+         kind: kind,
+         device: device,
+         position: position,
+       );
 
   /// The amount to scroll, in logical pixels.
   final Offset scrollDelta;
@@ -1014,25 +982,25 @@ class PointerCancelEvent extends PointerEvent {
     double orientation = 0.0,
     double tilt = 0.0,
   }) : super(
-          timeStamp: timeStamp,
-          pointer: pointer,
-          kind: kind,
-          device: device,
-          position: position,
-          buttons: buttons,
-          down: false,
-          obscured: obscured,
-          pressure: 0.0,
-          pressureMin: pressureMin,
-          pressureMax: pressureMax,
-          distance: distance,
-          distanceMax: distanceMax,
-          size: size,
-          radiusMajor: radiusMajor,
-          radiusMinor: radiusMinor,
-          radiusMin: radiusMin,
-          radiusMax: radiusMax,
-          orientation: orientation,
-          tilt: tilt,
-        );
+         timeStamp: timeStamp,
+         pointer: pointer,
+         kind: kind,
+         device: device,
+         position: position,
+         buttons: buttons,
+         down: false,
+         obscured: obscured,
+         pressure: 0.0,
+         pressureMin: pressureMin,
+         pressureMax: pressureMax,
+         distance: distance,
+         distanceMax: distanceMax,
+         size: size,
+         radiusMajor: radiusMajor,
+         radiusMinor: radiusMinor,
+         radiusMin: radiusMin,
+         radiusMax: radiusMax,
+         orientation: orientation,
+         tilt: tilt,
+       );
 }

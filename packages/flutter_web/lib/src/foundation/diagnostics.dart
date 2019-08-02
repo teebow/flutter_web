@@ -2239,9 +2239,11 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
 
   @override
   String valueToString({TextTreeConfiguration parentConfiguration}) {
-    if (value == null) return value.toString();
+    if (value == null)
+      return value.toString();
 
-    if (value.isEmpty) return ifEmpty ?? '[]';
+    if (value.isEmpty)
+      return ifEmpty ?? '[]';
 
     if (value.length == 5) {
       print('');
@@ -2249,25 +2251,25 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
     // TODO(flutter_web): upstream.
     if (T == double) {
       StringBuffer sb = new StringBuffer();
-      if (parentConfiguration != null &&
-          !parentConfiguration.lineBreakProperties) {
+      if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
         for (var item in value) {
-          if (sb.isNotEmpty) sb.write(', ');
-          sb.write(debugPrintDouble(item as double));
+          if (sb.isNotEmpty)
+            sb.write(', ');
+          sb.write(debugFormatDouble(item as double));
         }
         return '[${sb.toString()}]';
       } else {
         bool isSingleLine = _isSingleLine(style);
         for (var item in value) {
-          if (sb.isNotEmpty) sb.write(isSingleLine ? ', ' : '\n');
-          sb.write(debugPrintDouble(item as double));
+          if (sb.isNotEmpty)
+            sb.write(isSingleLine ? ', ' : '\n');
+          sb.write(debugFormatDouble(item as double));
         }
         return sb.toString();
       }
     }
 
-    if (parentConfiguration != null &&
-        !parentConfiguration.lineBreakProperties) {
+    if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Always display the value as a single line and enclose the iterable
       // value in brackets to avoid ambiguity.
       return '[${value.join(', ')}]';
@@ -2632,7 +2634,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
         }
         return desc;
       } else if (v is double) {
-        return debugPrintDouble(v);
+        return debugFormatDouble(v);
       }
     }
     return (v is DiagnosticableTree ? v.toStringShort() : v.toString()) ?? '';
@@ -3648,15 +3650,4 @@ class _DefaultDiagnosticsSerializationDelegate
       includeProperties: includeProperties ?? this.includeProperties,
     );
   }
-}
-
-/// Consistently converts double to string for VM and Web.
-///
-/// For double values that contain no fractional parts it will add .0 to output.
-/// TODO(flutter_web): upstream to Flutter.
-String debugPrintDouble(double value) {
-  if (value.floor() == value) {
-    return '${value}.0';
-  } else
-    return value.toString();
 }

@@ -238,15 +238,13 @@ class FixedExtentScrollController extends ScrollController {
   /// attached prior to accessing [selectedItem].
   int get selectedItem {
     assert(
-      positions.isNotEmpty,
-      'FixedExtentScrollController.selectedItem cannot be accessed before a '
-      'scroll view is built with it.',
-    );
+        positions.isNotEmpty,
+        'FixedExtentScrollController.selectedItem cannot be accessed before a '
+        'scroll view is built with it.',);
     assert(
-      positions.length == 1,
-      'The selectedItem property cannot be read when multiple scroll views are '
-      'attached to the same FixedExtentScrollController.',
-    );
+        positions.length == 1,
+        'The selectedItem property cannot be read when multiple scroll views are '
+        'attached to the same FixedExtentScrollController.',);
     final _FixedExtentScrollPosition position = this.position;
     return position.itemIndex;
   }
@@ -599,10 +597,9 @@ class ListWheelScrollView extends StatefulWidget {
         assert(clipToSize != null),
         assert(renderChildrenOutsideViewport != null),
         assert(
-          !renderChildrenOutsideViewport || !clipToSize,
-          RenderListWheelViewport
-              .clipToSizeAndRenderChildrenOutsideViewportConflict,
-        ),
+            !renderChildrenOutsideViewport || !clipToSize,
+            RenderListWheelViewport
+                .clipToSizeAndRenderChildrenOutsideViewportConflict,),
         childDelegate = ListWheelChildListDelegate(children: children),
         super(key: key);
 
@@ -636,10 +633,9 @@ class ListWheelScrollView extends StatefulWidget {
         assert(clipToSize != null),
         assert(renderChildrenOutsideViewport != null),
         assert(
-          !renderChildrenOutsideViewport || !clipToSize,
-          RenderListWheelViewport
-              .clipToSizeAndRenderChildrenOutsideViewportConflict,
-        ),
+            !renderChildrenOutsideViewport || !clipToSize,
+            RenderListWheelViewport
+                .clipToSizeAndRenderChildrenOutsideViewportConflict,),
         super(key: key);
 
   /// Typically a [FixedExtentScrollController] used to control the current item.
@@ -973,10 +969,9 @@ class ListWheelViewport extends RenderObjectWidget {
         assert(clipToSize != null),
         assert(renderChildrenOutsideViewport != null),
         assert(
-          !renderChildrenOutsideViewport || !clipToSize,
-          RenderListWheelViewport
-              .clipToSizeAndRenderChildrenOutsideViewportConflict,
-        ),
+            !renderChildrenOutsideViewport || !clipToSize,
+            RenderListWheelViewport
+                .clipToSizeAndRenderChildrenOutsideViewportConflict,),
         super(key: key);
 
   /// {@macro flutter.rendering.wheelList.diameterRatio}

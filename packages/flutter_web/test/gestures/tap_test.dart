@@ -128,8 +128,7 @@ void main() {
     tap.dispose();
   });
 
-  testGesture('Should not recognize two overlapping taps',
-      (GestureTester tester) {
+  testGesture('Should not recognize two overlapping taps', (GestureTester tester) {
     final TapGestureRecognizer tap = TapGestureRecognizer();
 
     int tapsRecognized = 0;
@@ -148,6 +147,7 @@ void main() {
     expect(tapsRecognized, 0);
     tester.route(down1);
     expect(tapsRecognized, 0);
+
 
     tester.route(up1);
     expect(tapsRecognized, 1);
@@ -262,8 +262,7 @@ void main() {
 
     tap.addPointer(down1);
     final TestGestureArenaMember member = TestGestureArenaMember();
-    final GestureArenaEntry entry =
-        GestureBinding.instance.gestureArena.add(1, member);
+    final GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(1, member);
     GestureBinding.instance.gestureArena.hold(1);
     tester.closeArena(1);
     expect(tapRecognized, isFalse);
@@ -281,8 +280,7 @@ void main() {
     tap.dispose();
   });
 
-  testGesture('Should trigger on release of held arena',
-      (GestureTester tester) {
+  testGesture('Should trigger on release of held arena', (GestureTester tester) {
     final TapGestureRecognizer tap = TapGestureRecognizer();
 
     bool tapRecognized = false;
@@ -292,8 +290,7 @@ void main() {
 
     tap.addPointer(down1);
     final TestGestureArenaMember member = TestGestureArenaMember();
-    final GestureArenaEntry entry =
-        GestureBinding.instance.gestureArena.add(1, member);
+    final GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(1, member);
     GestureBinding.instance.gestureArena.hold(1);
     tester.closeArena(1);
     expect(tapRecognized, isFalse);
@@ -342,30 +339,14 @@ void main() {
     final TapGestureRecognizer tapB = TapGestureRecognizer();
 
     final List<String> log = <String>[];
-    tapA.onTapDown = (TapDownDetails details) {
-      log.add('tapA onTapDown');
-    };
-    tapA.onTapUp = (TapUpDetails details) {
-      log.add('tapA onTapUp');
-    };
-    tapA.onTap = () {
-      log.add('tapA onTap');
-    };
-    tapA.onTapCancel = () {
-      log.add('tapA onTapCancel');
-    };
-    tapB.onTapDown = (TapDownDetails details) {
-      log.add('tapB onTapDown');
-    };
-    tapB.onTapUp = (TapUpDetails details) {
-      log.add('tapB onTapUp');
-    };
-    tapB.onTap = () {
-      log.add('tapB onTap');
-    };
-    tapB.onTapCancel = () {
-      log.add('tapB onTapCancel');
-    };
+    tapA.onTapDown = (TapDownDetails details) { log.add('tapA onTapDown'); };
+    tapA.onTapUp = (TapUpDetails details) { log.add('tapA onTapUp'); };
+    tapA.onTap = () { log.add('tapA onTap'); };
+    tapA.onTapCancel = () { log.add('tapA onTapCancel'); };
+    tapB.onTapDown = (TapDownDetails details) { log.add('tapB onTapDown'); };
+    tapB.onTapUp = (TapUpDetails details) { log.add('tapB onTapUp'); };
+    tapB.onTap = () { log.add('tapB onTap'); };
+    tapB.onTapCancel = () { log.add('tapB onTapCancel'); };
 
     log.add('start');
     tapA.addPointer(down1);
@@ -458,11 +439,9 @@ void main() {
     tap.dispose();
   });
 
-  testGesture('losing tap gesture recognizer does not send onTapCancel',
-      (GestureTester tester) {
+  testGesture('losing tap gesture recognizer does not send onTapCancel', (GestureTester tester) {
     final TapGestureRecognizer tap = TapGestureRecognizer();
-    final HorizontalDragGestureRecognizer drag =
-        HorizontalDragGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
 
     final List<String> recognized = <String>[];
     tap.onTapDown = (_) {

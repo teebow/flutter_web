@@ -24,6 +24,7 @@ const double _kScrollbarThickness = 2.5;
 const double _kScrollbarMainAxisMargin = 3.0;
 const double _kScrollbarCrossAxisMargin = 3.0;
 
+
 /// An iOS style scrollbar.
 ///
 /// A scrollbar indicates which portion of a [Scrollable] widget is actually
@@ -58,8 +59,7 @@ class CupertinoScrollbar extends StatefulWidget {
   _CupertinoScrollbarState createState() => _CupertinoScrollbarState();
 }
 
-class _CupertinoScrollbarState extends State<CupertinoScrollbar>
-    with TickerProviderStateMixin {
+class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProviderStateMixin {
   ScrollbarPainter _painter;
   TextDirection _textDirection;
 

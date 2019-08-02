@@ -12,10 +12,8 @@ typedef PointerRoute = void Function(PointerEvent event);
 
 /// A routing table for [PointerEvent] events.
 class PointerRouter {
-  final Map<int, LinkedHashSet<PointerRoute>> _routeMap =
-      <int, LinkedHashSet<PointerRoute>>{};
-  final LinkedHashSet<PointerRoute> _globalRoutes =
-      LinkedHashSet<PointerRoute>();
+  final Map<int, LinkedHashSet<PointerRoute>> _routeMap = <int, LinkedHashSet<PointerRoute>>{};
+  final LinkedHashSet<PointerRoute> _globalRoutes = LinkedHashSet<PointerRoute>();
 
   /// Adds a route to the routing table.
   ///
@@ -25,8 +23,7 @@ class PointerRouter {
   /// Routes added reentrantly within [PointerRouter.route] will take effect when
   /// routing the next event.
   void addRoute(int pointer, PointerRoute route) {
-    final LinkedHashSet<PointerRoute> routes =
-        _routeMap.putIfAbsent(pointer, () => LinkedHashSet<PointerRoute>());
+    final LinkedHashSet<PointerRoute> routes = _routeMap.putIfAbsent(pointer, () => LinkedHashSet<PointerRoute>());
     assert(!routes.contains(route));
     routes.add(route);
   }
@@ -43,7 +40,8 @@ class PointerRouter {
     final LinkedHashSet<PointerRoute> routes = _routeMap[pointer];
     assert(routes.contains(route));
     routes.remove(route);
-    if (routes.isEmpty) _routeMap.remove(pointer);
+    if (routes.isEmpty)
+      _routeMap.remove(pointer);
   }
 
   /// Adds a route to the global entry in the routing table.
@@ -82,8 +80,7 @@ class PointerRouter {
         route: route,
         event: event,
         informationCollector: () sync* {
-          yield DiagnosticsProperty<PointerEvent>('Event', event,
-              style: DiagnosticsTreeStyle.errorProperty);
+          yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
         },
       ));
     }
@@ -95,15 +92,16 @@ class PointerRouter {
   /// PointerRouter object.
   void route(PointerEvent event) {
     final LinkedHashSet<PointerRoute> routes = _routeMap[event.pointer];
-    final List<PointerRoute> globalRoutes =
-        List<PointerRoute>.from(_globalRoutes);
+    final List<PointerRoute> globalRoutes = List<PointerRoute>.from(_globalRoutes);
     if (routes != null) {
       for (PointerRoute route in List<PointerRoute>.from(routes)) {
-        if (routes.contains(route)) _dispatch(event, route);
+        if (routes.contains(route))
+          _dispatch(event, route);
       }
     }
     for (PointerRoute route in globalRoutes) {
-      if (_globalRoutes.contains(route)) _dispatch(event, route);
+      if (_globalRoutes.contains(route))
+        _dispatch(event, route);
     }
   }
 }
@@ -130,12 +128,13 @@ class FlutterErrorDetailsForPointerRouter extends FlutterErrorDetails {
     InformationCollector informationCollector,
     bool silent = false,
   }) : super(
-            exception: exception,
-            stack: stack,
-            library: library,
-            context: context,
-            informationCollector: informationCollector,
-            silent: silent);
+    exception: exception,
+    stack: stack,
+    library: library,
+    context: context,
+    informationCollector: informationCollector,
+    silent: silent
+  );
 
   /// The pointer router that caught the exception.
   ///

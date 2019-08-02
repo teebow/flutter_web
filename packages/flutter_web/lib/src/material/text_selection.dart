@@ -39,24 +39,16 @@ class _TextSelectionToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> items = <Widget>[];
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     if (handleCut != null)
-      items.add(FlatButton(
-          child: Text(localizations.cutButtonLabel), onPressed: handleCut));
+      items.add(FlatButton(child: Text(localizations.cutButtonLabel), onPressed: handleCut));
     if (handleCopy != null)
-      items.add(FlatButton(
-          child: Text(localizations.copyButtonLabel), onPressed: handleCopy));
+      items.add(FlatButton(child: Text(localizations.copyButtonLabel), onPressed: handleCopy));
     if (handlePaste != null)
-      items.add(FlatButton(
-        child: Text(localizations.pasteButtonLabel),
-        onPressed: handlePaste,
-      ));
+      items.add(FlatButton(child: Text(localizations.pasteButtonLabel), onPressed: handlePaste,));
     if (handleSelectAll != null)
-      items.add(FlatButton(
-          child: Text(localizations.selectAllButtonLabel),
-          onPressed: handleSelectAll));
+      items.add(FlatButton(child: Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll));
 
     return Material(
       elevation: 1.0,
@@ -71,8 +63,7 @@ class _TextSelectionToolbar extends StatelessWidget {
 /// Centers the toolbar around the given position, ensuring that it remains on
 /// screen.
 class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
-  _TextSelectionToolbarLayout(
-      this.screenSize, this.globalEditableRegion, this.position);
+  _TextSelectionToolbarLayout(this.screenSize, this.globalEditableRegion, this.position);
 
   /// The size of the screen at the time that the toolbar was last laid out.
   final Size screenSize;
@@ -118,14 +109,14 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
 
 /// Draws a single text selection handle which points up and to the left.
 class _TextSelectionHandlePainter extends CustomPainter {
-  _TextSelectionHandlePainter({this.color});
+  _TextSelectionHandlePainter({ this.color });
 
   final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()..color = color;
-    final double radius = size.width / 2.0;
+    final double radius = size.width/2.0;
     canvas.drawCircle(Offset(radius, radius), radius, paint);
     canvas.drawRect(Rect.fromLTWH(0.0, 0.0, radius, radius), paint);
   }
@@ -155,20 +146,16 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     // The toolbar should appear below the TextField
     // when there is not enough space above the TextField to show it.
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
-    final TextSelectionPoint endTextSelectionPoint =
-        (endpoints.length > 1) ? endpoints[1] : null;
+    final TextSelectionPoint endTextSelectionPoint = (endpoints.length > 1)
+        ? endpoints[1]
+        : null;
     final double x = (endTextSelectionPoint == null)
         ? startTextSelectionPoint.point.dx
-        : (startTextSelectionPoint.point.dx + endTextSelectionPoint.point.dx) /
-            2.0;
-    final double availableHeight = globalEditableRegion.top -
-        MediaQuery.of(context).padding.top -
-        _kToolbarScreenPadding;
+        : (startTextSelectionPoint.point.dx + endTextSelectionPoint.point.dx) / 2.0;
+    final double availableHeight
+        = globalEditableRegion.top - MediaQuery.of(context).padding.top - _kToolbarScreenPadding;
     final double y = (availableHeight < _kToolbarHeight)
-        ? startTextSelectionPoint.point.dy +
-            globalEditableRegion.height +
-            _kToolbarHeight +
-            _kToolbarScreenPadding
+        ? startTextSelectionPoint.point.dy + globalEditableRegion.height + _kToolbarHeight + _kToolbarScreenPadding
         : startTextSelectionPoint.point.dy - globalEditableRegion.height;
     final Offset preciseMidpoint = Offset(x, y);
 
@@ -184,8 +171,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
           handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
           handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
           handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
-          handleSelectAll:
-              canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
+          handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
         ),
       ),
     );
@@ -193,8 +179,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
 
   /// Builder for material-style text selection handles.
   @override
-  Widget buildHandle(
-      BuildContext context, TextSelectionHandleType type, double textHeight) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
     final Widget handle = Padding(
       padding: const EdgeInsets.only(right: 26.0, bottom: 26.0),
       child: SizedBox(
@@ -202,7 +187,8 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
         height: _kHandleSize,
         child: CustomPaint(
           painter: _TextSelectionHandlePainter(
-              color: Theme.of(context).textSelectionHandleColor),
+            color: Theme.of(context).textSelectionHandleColor
+          ),
         ),
       ),
     );
@@ -230,5 +216,4 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
 }
 
 /// Text selection controls that follow the Material Design specification.
-final TextSelectionControls materialTextSelectionControls =
-    _MaterialTextSelectionControls();
+final TextSelectionControls materialTextSelectionControls = _MaterialTextSelectionControls();

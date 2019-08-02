@@ -14,8 +14,7 @@ import '../flutter_test_alternative.dart';
 
 typedef HandleEventCallback = void Function(PointerEvent event);
 
-class TestGestureFlutterBinding extends BindingBase
-    with ServicesBinding, SchedulerBinding, GestureBinding {
+class TestGestureFlutterBinding extends BindingBase with ServicesBinding, SchedulerBinding, GestureBinding {
   HandleEventCallback callback;
 
   @override
@@ -67,17 +66,17 @@ void main() {
       isInHitRegionTwo = false;
       tracker = MouseTracker(
         GestureBinding.instance.pointerRouter,
-        (Offset _) sync* {
+            (Offset _) sync* {
           if (isInHitRegionOne)
             yield annotation;
-          else if (isInHitRegionTwo) yield partialAnnotation;
+          else if (isInHitRegionTwo)
+            yield partialAnnotation;
         },
       );
     });
 
     test('receives and processes mouse hover events', () {
-      final ui.PointerDataPacket packet1 =
-          ui.PointerDataPacket(data: <ui.PointerData>[
+      final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.hover,
           physicalX: 0.0 * ui.window.devicePixelRatio,
@@ -85,8 +84,7 @@ void main() {
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      final ui.PointerDataPacket packet2 =
-          ui.PointerDataPacket(data: <ui.PointerData>[
+      final ui.PointerDataPacket packet2 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.hover,
           physicalX: 1.0 * ui.window.devicePixelRatio,
@@ -94,15 +92,13 @@ void main() {
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      const ui.PointerDataPacket packet3 =
-          ui.PointerDataPacket(data: <ui.PointerData>[
+      const ui.PointerDataPacket packet3 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.remove,
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      final ui.PointerDataPacket packet4 =
-          ui.PointerDataPacket(data: <ui.PointerData>[
+      final ui.PointerDataPacket packet4 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.hover,
           physicalX: 1.0 * ui.window.devicePixelRatio,
@@ -110,8 +106,7 @@ void main() {
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      final ui.PointerDataPacket packet5 =
-          ui.PointerDataPacket(data: <ui.PointerData>[
+      final ui.PointerDataPacket packet5 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.hover,
           physicalX: 1.0 * ui.window.devicePixelRatio,
@@ -185,8 +180,7 @@ void main() {
       expect(move.last.runtimeType, equals(PointerHoverEvent));
     });
     test('detects exit when annotated layer no longer hit', () {
-      final ui.PointerDataPacket packet1 =
-          ui.PointerDataPacket(data: <ui.PointerData>[
+      final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.hover,
           physicalX: 0.0 * ui.window.devicePixelRatio,
@@ -200,8 +194,7 @@ void main() {
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      final ui.PointerDataPacket packet2 =
-          ui.PointerDataPacket(data: <ui.PointerData>[
+      final ui.PointerDataPacket packet2 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.hover,
           physicalX: 1.0 * ui.window.devicePixelRatio,
@@ -249,8 +242,7 @@ void main() {
     });
 
     test("don't flip out if not all mouse events are listened to", () {
-      final ui.PointerDataPacket packet =
-          ui.PointerDataPacket(data: <ui.PointerData>[
+      final ui.PointerDataPacket packet = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.hover,
           physicalX: 1.0 * ui.window.devicePixelRatio,
@@ -269,8 +261,7 @@ void main() {
       isInHitRegionTwo = false;
     });
     test('detects exit when mouse goes away', () {
-      final ui.PointerDataPacket packet1 =
-          ui.PointerDataPacket(data: <ui.PointerData>[
+      final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.hover,
           physicalX: 0.0 * ui.window.devicePixelRatio,
@@ -284,8 +275,7 @@ void main() {
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      const ui.PointerDataPacket packet2 =
-          ui.PointerDataPacket(data: <ui.PointerData>[
+      const ui.PointerDataPacket packet2 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.remove,
           kind: PointerDeviceKind.mouse,
@@ -311,8 +301,7 @@ void main() {
       expect(exit.first.runtimeType, equals(PointerExitEvent));
     });
     test('handles mouse down and move', () {
-      final ui.PointerDataPacket packet1 =
-          ui.PointerDataPacket(data: <ui.PointerData>[
+      final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.hover,
           physicalX: 0.0 * ui.window.devicePixelRatio,
@@ -326,8 +315,7 @@ void main() {
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      final ui.PointerDataPacket packet2 =
-          ui.PointerDataPacket(data: <ui.PointerData>[
+      final ui.PointerDataPacket packet2 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.down,
           physicalX: 1.0 * ui.window.devicePixelRatio,

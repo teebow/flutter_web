@@ -54,19 +54,19 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     this.radius,
     this.minLength = _kMinThumbExtent,
     double minOverscrollLength,
-  })  : assert(color != null),
-        assert(textDirection != null),
-        assert(thickness != null),
-        assert(fadeoutOpacityAnimation != null),
-        assert(mainAxisMargin != null),
-        assert(crossAxisMargin != null),
-        assert(minLength != null),
-        assert(minLength >= 0),
-        assert(minOverscrollLength == null || minOverscrollLength <= minLength),
-        assert(minOverscrollLength == null || minOverscrollLength >= 0),
-        assert(padding != null),
-        assert(padding.isNonNegative),
-        minOverscrollLength = minOverscrollLength ?? minLength {
+  }) : assert(color != null),
+       assert(textDirection != null),
+       assert(thickness != null),
+       assert(fadeoutOpacityAnimation != null),
+       assert(mainAxisMargin != null),
+       assert(crossAxisMargin != null),
+       assert(minLength != null),
+       assert(minLength >= 0),
+       assert(minOverscrollLength == null || minOverscrollLength <= minLength),
+       assert(minOverscrollLength == null || minOverscrollLength >= 0),
+       assert(padding != null),
+       assert(padding.isNonNegative),
+       minOverscrollLength = minOverscrollLength ?? minLength {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
 
@@ -154,13 +154,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   Paint get _paint {
-    return Paint()
-      ..color =
-          color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
+    return Paint()..color =
+        color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
   }
 
-  void _paintThumbCrossAxis(Canvas canvas, Size size, double thumbOffset,
-      double thumbExtent, AxisDirection direction) {
+  void _paintThumbCrossAxis(Canvas canvas, Size size, double thumbOffset, double thumbExtent, AxisDirection direction) {
     double x, y;
     Size thumbSize;
 
@@ -168,15 +166,15 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case AxisDirection.down:
         thumbSize = Size(thickness, thumbExtent);
         x = textDirection == TextDirection.rtl
-            ? crossAxisMargin + padding.left
-            : size.width - thickness - crossAxisMargin - padding.right;
+          ? crossAxisMargin + padding.left
+          : size.width - thickness - crossAxisMargin - padding.right;
         y = thumbOffset;
         break;
       case AxisDirection.up:
         thumbSize = Size(thickness, thumbExtent);
         x = textDirection == TextDirection.rtl
-            ? crossAxisMargin + padding.left
-            : size.width - thickness - crossAxisMargin - padding.right;
+          ? crossAxisMargin + padding.left
+          : size.width - thickness - crossAxisMargin - padding.right;
         y = thumbOffset;
         break;
       case AxisDirection.left:
@@ -199,39 +197,40 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   double _thumbExtent(
-      double mainAxisPadding,
-      double extentInside,
-      double contentExtent,
-      double beforeExtent,
-      double afterExtent,
-      double trackExtent) {
+    double mainAxisPadding,
+    double extentInside,
+    double contentExtent,
+    double beforeExtent,
+    double afterExtent,
+    double trackExtent
+  ) {
     // Thumb extent reflects fraction of content visible, as long as this
     // isn't less than the absolute minimum size.
     // contentExtent >= viewportDimension, so (contentExtent - mainAxisPadding) > 0
-    final double fractionVisible =
-        ((extentInside - mainAxisPadding) / (contentExtent - mainAxisPadding))
-            .clamp(0.0, 1.0);
+    final double fractionVisible = ((extentInside - mainAxisPadding) / (contentExtent - mainAxisPadding))
+      .clamp(0.0, 1.0);
 
     final double thumbExtent = math.max(
-        math.min(trackExtent, minOverscrollLength),
-        trackExtent * fractionVisible);
+      math.min(trackExtent, minOverscrollLength),
+      trackExtent * fractionVisible
+    );
 
     final double safeMinLength = math.min(minLength, trackExtent);
     final double newMinLength = (beforeExtent > 0 && afterExtent > 0)
-        // Thumb extent is no smaller than minLength if scrolling normally.
-        ? safeMinLength
-        // User is overscrolling. Thumb extent can be less than minLength
-        // but no smaller than minOverscrollLength. We can't use the
-        // fractionVisible to produce intermediate values between minLength and
-        // minOverscrollLength when the user is transitioning from regular
-        // scrolling to overscrolling, so we instead use the percentage of the
-        // content that is still in the viewport to determine the size of the
-        // thumb. iOS behavior appears to have the thumb reach its minimum size
-        // with ~20% of overscroll. We map the percentage of minLength from
-        // [0.8, 1.0] to [0.0, 1.0], so 0% to 20% of overscroll will produce
-        // values for the thumb that range between minLength and the smallest
-        // possible value, minOverscrollLength.
-        : safeMinLength * ((fractionVisible - 0.8).clamp(0.0, 0.2) / 0.2);
+      // Thumb extent is no smaller than minLength if scrolling normally.
+      ? safeMinLength
+      // User is overscrolling. Thumb extent can be less than minLength
+      // but no smaller than minOverscrollLength. We can't use the
+      // fractionVisible to produce intermediate values between minLength and
+      // minOverscrollLength when the user is transitioning from regular
+      // scrolling to overscrolling, so we instead use the percentage of the
+      // content that is still in the viewport to determine the size of the
+      // thumb. iOS behavior appears to have the thumb reach its minimum size
+      // with ~20% of overscroll. We map the percentage of minLength from
+      // [0.8, 1.0] to [0.0, 1.0], so 0% to 20% of overscroll will produce
+      // values for the thumb that range between minLength and the smallest
+      // possible value, minOverscrollLength.
+      : safeMinLength * ((fractionVisible - 0.8).clamp(0.0, 0.2) / 0.2);
 
     // The `thumbExtent` should be no greater than `trackSize`, otherwise
     // the scrollbar may scroll towards the wrong direction.
@@ -246,60 +245,45 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (_lastAxisDirection == null ||
-        _lastMetrics == null ||
-        fadeoutOpacityAnimation.value == 0.0) return;
+    if (_lastAxisDirection == null
+        || _lastMetrics == null
+        || fadeoutOpacityAnimation.value == 0.0)
+      return;
 
-    final bool isVertical = _lastAxisDirection == AxisDirection.down ||
-        _lastAxisDirection == AxisDirection.up;
-    final bool isReversed = _lastAxisDirection == AxisDirection.up ||
-        _lastAxisDirection == AxisDirection.left;
+    final bool isVertical = _lastAxisDirection == AxisDirection.down || _lastAxisDirection == AxisDirection.up;
+    final bool isReversed = _lastAxisDirection == AxisDirection.up || _lastAxisDirection == AxisDirection.left;
 
-    final double mainAxisPadding =
-        isVertical ? padding.vertical : padding.horizontal;
+    final double mainAxisPadding = isVertical ? padding.vertical : padding.horizontal;
     // The size of the scrollable area.
-    final double trackExtent =
-        _lastMetrics.viewportDimension - 2 * mainAxisMargin - mainAxisPadding;
+    final double trackExtent = _lastMetrics.viewportDimension - 2 * mainAxisMargin - mainAxisPadding;
 
     // Skip painting if there's not enough space.
     if (_lastMetrics.viewportDimension <= mainAxisPadding || trackExtent <= 0) {
       return;
     }
 
-    final double totalContentExtent = _lastMetrics.maxScrollExtent -
-        _lastMetrics.minScrollExtent +
-        _lastMetrics.viewportDimension;
+    final double totalContentExtent =
+      _lastMetrics.maxScrollExtent
+      - _lastMetrics.minScrollExtent
+      + _lastMetrics.viewportDimension;
 
-    final double beforeExtent =
-        isReversed ? _lastMetrics.extentAfter : _lastMetrics.extentBefore;
-    final double afterExtent =
-        isReversed ? _lastMetrics.extentBefore : _lastMetrics.extentAfter;
+    final double beforeExtent = isReversed ? _lastMetrics.extentAfter : _lastMetrics.extentBefore;
+    final double afterExtent = isReversed ? _lastMetrics.extentBefore : _lastMetrics.extentAfter;
 
-    final double thumbExtent = _thumbExtent(
-        mainAxisPadding,
-        _lastMetrics.extentInside,
-        totalContentExtent,
-        beforeExtent,
-        afterExtent,
-        trackExtent);
+    final double thumbExtent = _thumbExtent(mainAxisPadding, _lastMetrics.extentInside, totalContentExtent,
+      beforeExtent, afterExtent, trackExtent);
 
     final double beforePadding = isVertical ? padding.top : padding.left;
-    final double scrollableExtent =
-        _lastMetrics.maxScrollExtent - _lastMetrics.minScrollExtent;
+    final double scrollableExtent = _lastMetrics.maxScrollExtent - _lastMetrics.minScrollExtent;
 
     final double fractionPast = (scrollableExtent > 0)
-        ? ((_lastMetrics.pixels - _lastMetrics.minScrollExtent) /
-                scrollableExtent)
-            .clamp(0.0, 1.0)
-        : 0;
+      ? ((_lastMetrics.pixels - _lastMetrics.minScrollExtent) / scrollableExtent).clamp(0.0, 1.0)
+      : 0;
 
-    final double thumbOffset = (isReversed ? 1 - fractionPast : fractionPast) *
-            (trackExtent - thumbExtent) +
-        mainAxisMargin +
-        beforePadding;
+    final double thumbOffset = (isReversed ? 1 - fractionPast : fractionPast) * (trackExtent - thumbExtent)
+      + mainAxisMargin + beforePadding;
 
-    return _paintThumbCrossAxis(
-        canvas, size, thumbOffset, thumbExtent, _lastAxisDirection);
+    return _paintThumbCrossAxis(canvas, size, thumbOffset, thumbExtent, _lastAxisDirection);
   }
 
   // Scrollbars are (currently) not interactive.
@@ -309,15 +293,15 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   @override
   bool shouldRepaint(ScrollbarPainter old) {
     // Should repaint if any properties changed.
-    return color != old.color ||
-        textDirection != old.textDirection ||
-        thickness != old.thickness ||
-        fadeoutOpacityAnimation != old.fadeoutOpacityAnimation ||
-        mainAxisMargin != old.mainAxisMargin ||
-        crossAxisMargin != old.crossAxisMargin ||
-        radius != old.radius ||
-        minLength != old.minLength ||
-        padding != old.padding;
+    return color != old.color
+        || textDirection != old.textDirection
+        || thickness != old.thickness
+        || fadeoutOpacityAnimation != old.fadeoutOpacityAnimation
+        || mainAxisMargin != old.mainAxisMargin
+        || crossAxisMargin != old.crossAxisMargin
+        || radius != old.radius
+        || minLength != old.minLength
+        || padding != old.padding;
   }
 
   @override

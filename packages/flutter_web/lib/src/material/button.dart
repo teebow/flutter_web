@@ -57,19 +57,18 @@ class RawMaterialButton extends StatefulWidget {
     this.focusNode,
     MaterialTapTargetSize materialTapTargetSize,
     this.child,
-  })  : materialTapTargetSize =
-            materialTapTargetSize ?? MaterialTapTargetSize.padded,
-        assert(shape != null),
-        assert(elevation != null && elevation >= 0.0),
-        assert(focusElevation != null && focusElevation >= 0.0),
-        assert(hoverElevation != null && hoverElevation >= 0.0),
-        assert(highlightElevation != null && highlightElevation >= 0.0),
-        assert(disabledElevation != null && disabledElevation >= 0.0),
-        assert(padding != null),
-        assert(constraints != null),
-        assert(animationDuration != null),
-        assert(clipBehavior != null),
-        super(key: key);
+  }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
+       assert(shape != null),
+       assert(elevation != null && elevation >= 0.0),
+       assert(focusElevation != null && focusElevation >= 0.0),
+       assert(hoverElevation != null && hoverElevation >= 0.0),
+       assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(disabledElevation != null && disabledElevation >= 0.0),
+       assert(padding != null),
+       assert(constraints != null),
+       assert(animationDuration != null),
+       assert(clipBehavior != null),
+       super(key: key);
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -281,9 +280,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
   Widget build(BuildContext context) {
     final Widget result = Focus(
       focusNode: widget.focusNode,
-      onFocusChange: (bool focused) => setState(() {
-        _focused = focused;
-      }),
+      onFocusChange: (bool focused) => setState(() { _focused = focused; }),
       child: ConstrainedBox(
         constraints: widget.constraints,
         child: Material(
@@ -291,9 +288,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
           textStyle: widget.textStyle,
           shape: widget.shape,
           color: widget.fillColor,
-          type: widget.fillColor == null
-              ? MaterialType.transparency
-              : MaterialType.button,
+          type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
           animationDuration: widget.animationDuration,
           clipBehavior: widget.clipBehavior,
           child: InkWell(
@@ -362,8 +357,7 @@ class _InputPadding extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(
-      BuildContext context, covariant _RenderInputPadding renderObject) {
+  void updateRenderObject(BuildContext context, covariant _RenderInputPadding renderObject) {
     renderObject.minSize = minSize;
   }
 }
@@ -374,7 +368,8 @@ class _RenderInputPadding extends RenderShiftedBox {
   Size get minSize => _minSize;
   Size _minSize;
   set minSize(Size value) {
-    if (_minSize == value) return;
+    if (_minSize == value)
+      return;
     _minSize = value;
     markNeedsLayout();
   }
@@ -422,7 +417,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, {Offset position}) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (super.hitTest(result, position: position)) {
       return true;
     }

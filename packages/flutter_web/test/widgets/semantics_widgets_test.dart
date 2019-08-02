@@ -495,7 +495,7 @@ void main() {
       liveRegion: true,
     ));
     final List<SemanticsFlag> flags = SemanticsFlag.values.values.toList()
-      // TODO(flutter_web): upstream.
+    // TODO(flutter_web): upstream.
       ..remove(SemanticsFlag.isMultiline);
     flags
       ..remove(SemanticsFlag.hasToggledState)

@@ -62,9 +62,7 @@ void main() {
       expect(node.getSemanticsData().tags, tags);
     });
 
-    test(
-        'after markNeedsSemanticsUpdate() all render objects between two semantic boundaries are asked for annotations',
-        () {
+    test('after markNeedsSemanticsUpdate() all render objects between two semantic boundaries are asked for annotations', () {
       renderer.pipelineOwner.ensureSemantics();
 
       TestRender middle;
@@ -92,10 +90,7 @@ void main() {
       layout(root);
       pumpFrame(phase: EnginePhase.flushSemantics);
 
-      int expectedActions = SemanticsAction.tap.index |
-          SemanticsAction.longPress.index |
-          SemanticsAction.scrollLeft.index |
-          SemanticsAction.scrollRight.index;
+      int expectedActions = SemanticsAction.tap.index | SemanticsAction.longPress.index | SemanticsAction.scrollLeft.index | SemanticsAction.scrollRight.index;
       expect(root.debugSemantics.getSemanticsData().actions, expectedActions);
 
       middle
@@ -105,10 +100,7 @@ void main() {
 
       pumpFrame(phase: EnginePhase.flushSemantics);
 
-      expectedActions = SemanticsAction.tap.index |
-          SemanticsAction.longPress.index |
-          SemanticsAction.scrollDown.index |
-          SemanticsAction.scrollRight.index;
+      expectedActions = SemanticsAction.tap.index | SemanticsAction.longPress.index | SemanticsAction.scrollDown.index | SemanticsAction.scrollRight.index;
       expect(root.debugSemantics.getSemanticsData().actions, expectedActions);
     });
   });
@@ -156,8 +148,7 @@ void main() {
 
     // Different names.
     expect(() {
-      const OrdinalSortKey(0.0, name: 'a')
-          .compareTo(const OrdinalSortKey(0.0, name: 'b'));
+      const OrdinalSortKey(0.0, name: 'a').compareTo(const OrdinalSortKey(0.0, name: 'b'));
     }, throwsAssertionError);
   });
 
@@ -245,21 +236,22 @@ void main() {
     child3.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[
-        SemanticsNode()..rect = Rect.fromLTRB(5.0, 0.0, 10.0, 5.0),
-        SemanticsNode()..rect = Rect.fromLTRB(0.0, 0.0, 5.0, 5.0),
+        SemanticsNode()
+          ..rect = Rect.fromLTRB(5.0, 0.0, 10.0, 5.0),
+        SemanticsNode()
+          ..rect = Rect.fromLTRB(0.0, 0.0, 5.0, 5.0),
       ],
     );
 
     final SemanticsNode rootComplex = SemanticsNode()
       ..rect = Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
     rootComplex.updateWith(
-      config: null,
-      childrenInInversePaintOrder: <SemanticsNode>[child1, child2, child3],
+        config: null,
+        childrenInInversePaintOrder: <SemanticsNode>[child1, child2, child3],
     );
 
     expect(
-      rootComplex.toStringDeep(
-          childOrder: DebugSemanticsDumpOrder.traversalOrder),
+      rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversalOrder),
       'SemanticsNode#7\n'
       ' │ STALE\n'
       ' │ owner: null\n'
@@ -292,8 +284,7 @@ void main() {
     );
 
     expect(
-      rootComplex.toStringDeep(
-          childOrder: DebugSemanticsDumpOrder.inverseHitTest),
+      rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest),
       'SemanticsNode#7\n'
       ' │ STALE\n'
       ' │ owner: null\n'
@@ -369,9 +360,9 @@ void main() {
     final SemanticsConfiguration config = SemanticsConfiguration()
       ..isSemanticBoundary = true
       ..isMergingSemanticsOfDescendants = true
-      ..onScrollUp = () {}
-      ..onLongPress = () {}
-      ..onShowOnScreen = () {}
+      ..onScrollUp = () { }
+      ..onLongPress = () { }
+      ..onShowOnScreen = () { }
       ..isChecked = false
       ..isSelected = true
       ..isButton = true
@@ -384,7 +375,8 @@ void main() {
       ..updateWith(config: config, childrenInInversePaintOrder: null);
     expect(
       allProperties.toStringDeep(),
-      equalsIgnoringHashCodes('SemanticsNode#2\n'
+      equalsIgnoringHashCodes(
+          'SemanticsNode#2\n'
           '   STALE\n'
           '   owner: null\n'
           '   merge boundary ⛔️\n'
@@ -393,7 +385,8 @@ void main() {
           '   flags: hasCheckedState, isSelected, isButton\n'
           '   label: "Use all the properties"\n'
           '   textDirection: rtl\n'
-          '   sortKey: OrdinalSortKey#19df5(order: 1.0)\n'),
+          '   sortKey: OrdinalSortKey#19df5(order: 1.0)\n'
+      ),
     );
     expect(
       allProperties.getSemanticsData().toString(),
@@ -418,17 +411,13 @@ void main() {
 
   test('Custom actions debug properties', () {
     final SemanticsConfiguration configuration = SemanticsConfiguration();
-    const CustomSemanticsAction action1 =
-        CustomSemanticsAction(label: 'action1');
-    const CustomSemanticsAction action2 =
-        CustomSemanticsAction(label: 'action2');
-    const CustomSemanticsAction action3 =
-        CustomSemanticsAction(label: 'action3');
-    configuration.customSemanticsActions =
-        <CustomSemanticsAction, VoidCallback>{
-      action1: () {},
-      action2: () {},
-      action3: () {},
+    const CustomSemanticsAction action1 = CustomSemanticsAction(label: 'action1');
+    const CustomSemanticsAction action2 = CustomSemanticsAction(label: 'action2');
+    const CustomSemanticsAction action3 = CustomSemanticsAction(label: 'action3');
+    configuration.customSemanticsActions = <CustomSemanticsAction, VoidCallback>{
+      action1: () { },
+      action2: () { },
+      action3: () { },
     };
     final SemanticsNode actionNode = SemanticsNode();
     actionNode.updateWith(config: configuration);
@@ -464,12 +453,12 @@ void main() {
       '   elevation: 0.0\n'
       '   thicknes: 0.0\n',
     );
+
   });
 
   test('SemanticsConfiguration getter/setter', () {
     final SemanticsConfiguration config = SemanticsConfiguration();
-    const CustomSemanticsAction customAction =
-        CustomSemanticsAction(label: 'test');
+    const CustomSemanticsAction customAction = CustomSemanticsAction(label: 'test');
 
     expect(config.isSemanticBoundary, isFalse);
     expect(config.isButton, isFalse);
@@ -504,18 +493,18 @@ void main() {
     config.isFocused = true;
     config.isTextField = true;
 
-    final VoidCallback onShowOnScreen = () {};
-    final VoidCallback onScrollDown = () {};
-    final VoidCallback onScrollUp = () {};
-    final VoidCallback onScrollLeft = () {};
-    final VoidCallback onScrollRight = () {};
-    final VoidCallback onLongPress = () {};
-    final VoidCallback onDecrease = () {};
-    final VoidCallback onIncrease = () {};
-    final MoveCursorHandler onMoveCursorForwardByCharacter = (bool _) {};
-    final MoveCursorHandler onMoveCursorBackwardByCharacter = (bool _) {};
-    final VoidCallback onTap = () {};
-    final VoidCallback onCustomAction = () {};
+    final VoidCallback onShowOnScreen = () { };
+    final VoidCallback onScrollDown = () { };
+    final VoidCallback onScrollUp = () { };
+    final VoidCallback onScrollLeft = () { };
+    final VoidCallback onScrollRight = () { };
+    final VoidCallback onLongPress = () { };
+    final VoidCallback onDecrease = () { };
+    final VoidCallback onIncrease = () { };
+    final MoveCursorHandler onMoveCursorForwardByCharacter = (bool _) { };
+    final MoveCursorHandler onMoveCursorBackwardByCharacter = (bool _) { };
+    final VoidCallback onTap = () { };
+    final VoidCallback onCustomAction = () { };
 
     config.onShowOnScreen = onShowOnScreen;
     config.onScrollDown = onScrollDown;
@@ -548,16 +537,15 @@ void main() {
     expect(config.onLongPress, same(onLongPress));
     expect(config.onDecrease, same(onDecrease));
     expect(config.onIncrease, same(onIncrease));
-    expect(config.onMoveCursorForwardByCharacter,
-        same(onMoveCursorForwardByCharacter));
-    expect(config.onMoveCursorBackwardByCharacter,
-        same(onMoveCursorBackwardByCharacter));
+    expect(config.onMoveCursorForwardByCharacter, same(onMoveCursorForwardByCharacter));
+    expect(config.onMoveCursorBackwardByCharacter, same(onMoveCursorBackwardByCharacter));
     expect(config.onTap, same(onTap));
     expect(config.customSemanticsActions[customAction], same(onCustomAction));
   });
 }
 
 class TestRender extends RenderProxyBox {
+
   TestRender({
     this.hasTapAction = false,
     this.hasLongPressAction = false,
@@ -577,17 +565,24 @@ class TestRender extends RenderProxyBox {
   bool hasScrollDownAction;
   bool isSemanticBoundary;
 
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
     config.isSemanticBoundary = isSemanticBoundary;
-    if (hasTapAction) config.onTap = () {};
-    if (hasLongPressAction) config.onLongPress = () {};
-    if (hasScrollLeftAction) config.onScrollLeft = () {};
-    if (hasScrollRightAction) config.onScrollRight = () {};
-    if (hasScrollUpAction) config.onScrollUp = () {};
-    if (hasScrollDownAction) config.onScrollDown = () {};
+    if (hasTapAction)
+      config.onTap = () { };
+    if (hasLongPressAction)
+      config.onLongPress = () { };
+    if (hasScrollLeftAction)
+      config.onScrollLeft = () { };
+    if (hasScrollRightAction)
+      config.onScrollRight = () { };
+    if (hasScrollUpAction)
+      config.onScrollUp = () { };
+    if (hasScrollDownAction)
+      config.onScrollDown = () { };
   }
 }
 
