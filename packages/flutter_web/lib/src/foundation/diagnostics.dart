@@ -5,7 +5,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter_web_ui/ui.dart' show isWeb;
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
@@ -2245,37 +2244,21 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
     if (value.isEmpty)
       return ifEmpty ?? '[]';
 
-    if (value.length == 5) {
-      print('');
-    }
-    // TODO(flutter_web): upstream.
-    if (T == double) {
-      StringBuffer sb = new StringBuffer();
-      if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
-        for (var item in value) {
-          if (sb.isNotEmpty)
-            sb.write(', ');
-          sb.write(debugFormatDouble(item as double));
-        }
-        return '[${sb.toString()}]';
+    final Iterable<String> formattedValues = value.map((T v) {
+      if (T == double && v is double) {
+        return debugFormatDouble(v);
       } else {
-        bool isSingleLine = _isSingleLine(style);
-        for (var item in value) {
-          if (sb.isNotEmpty)
-            sb.write(isSingleLine ? ', ' : '\n');
-          sb.write(debugFormatDouble(item as double));
-        }
-        return sb.toString();
+        return v.toString();
       }
-    }
+    });
 
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Always display the value as a single line and enclose the iterable
       // value in brackets to avoid ambiguity.
-      return '[${value.join(', ')}]';
+      return '[${formattedValues.join(', ')}]';
     }
 
-    return value.join(_isSingleLine(style) ? ', ' : '\n');
+    return formattedValues.join(_isSingleLine(style) ? ', ' : '\n');
   }
 
   /// Priority level of the diagnostic used to control which diagnostics should
@@ -2622,21 +2605,6 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     // DiagnosticableTree values are shown using the shorter toStringShort()
     // instead of the longer toString() because the toString() for a
     // DiagnosticableTree value is likely too large to be useful.
-
-    if (isWeb) {
-      if (v is Function) {
-        // TODO(flutter_web): upstream.
-        // Normalize web/DDC specific closure toString syntax.
-        // DDC Example: Closure: () => void from: function onClick().
-        String desc = v.toString();
-        if (desc.contains('Closure:') && desc.contains('from:')) {
-          desc = desc.substring(0, desc.indexOf('from: ') - 1);
-        }
-        return desc;
-      } else if (v is double) {
-        return debugFormatDouble(v);
-      }
-    }
     return (v is DiagnosticableTree ? v.toStringShort() : v.toString()) ?? '';
   }
 

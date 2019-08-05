@@ -1,7 +1,7 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// Synced 2019-05-30T14:20:56.274078.
+// Synced 2019-08-05T10:24:57.062679.
 
 import 'package:flutter_web_ui/ui.dart' show lerpDouble;
 
@@ -121,9 +121,9 @@ class DialogTheme extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor));
+    properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation));
+    properties.add(DoubleProperty('elevation', elevation));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
   }
