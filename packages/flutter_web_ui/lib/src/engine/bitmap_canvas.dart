@@ -367,20 +367,6 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
     //
     // This matrix is sufficient to represent 2D rotates, translates, scales,
     // and skews.
-    assert(() {
-      if (matrix4[2] != 0.0 ||
-          matrix4[3] != 0.0 ||
-          matrix4[7] != 0.0 ||
-          matrix4[8] != 0.0 ||
-          matrix4[9] != 0.0 ||
-          matrix4[10] != 1.0 ||
-          matrix4[11] != 0.0 ||
-          matrix4[14] != 0.0 ||
-          matrix4[15] != 1.0) {
-        print('WARNING: 3D transformation matrix was passed to BitmapCanvas.');
-      }
-      return true;
-    }());
     _ctx.transform(
       matrix4[0],
       matrix4[1],
