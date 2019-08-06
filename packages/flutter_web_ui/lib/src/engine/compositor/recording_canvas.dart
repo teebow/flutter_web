@@ -124,8 +124,14 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   void drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
-    // TODO(het): Implement this.
-    //throw 'drawImageRect';
+    final SkImage skImage = image;
+    skCanvas.callMethod('drawImageRect', <dynamic>[
+      skImage.skImage,
+      makeSkRect(src),
+      makeSkRect(dst),
+      makeSkPaint(paint),
+      false,
+    ]);
   }
 
   @override

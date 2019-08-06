@@ -1851,6 +1851,15 @@ Future<Codec> instantiateImageCodec(Uint8List list,
 /// Returns an error message if the instantiation has failed, null otherwise.
 String _instantiateImageCodec(
     Uint8List list, engine.Callback<Codec> callback, _ImageInfo imageInfo) {
+  if (engine.experimentalUseSkia) {
+    if (imageInfo == null) {
+      engine.skiaInstantiateImageCodec(list, callback);
+    } else {
+      engine.skiaInstantiateImageCodec(list, callback, imageInfo.width,
+          imageInfo.height, imageInfo.format, imageInfo.rowBytes);
+    }
+    return null;
+  }
   final html.Blob blob = html.Blob(<dynamic>[list.buffer]);
   callback(engine.HtmlBlobCodec(blob));
   return null;

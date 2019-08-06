@@ -26,6 +26,7 @@ part 'engine/browser_location.dart';
 part 'engine/compositor/canvas.dart';
 part 'engine/compositor/engine_delegate.dart';
 part 'engine/compositor/fonts.dart';
+part 'engine/compositor/image.dart';
 part 'engine/compositor/initialization.dart';
 part 'engine/compositor/layer.dart';
 part 'engine/compositor/layer_scene_builder.dart';
