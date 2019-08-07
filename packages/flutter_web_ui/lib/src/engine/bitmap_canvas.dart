@@ -226,7 +226,8 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
       ctx.lineJoin = 'miter';
     }
     if (paint.shader != null) {
-      final Object paintStyle = paint.shader.createPaintStyle(ctx);
+      final EngineGradient engineShader = paint.shader;
+      final Object paintStyle = engineShader.createPaintStyle(ctx);
       _setFillAndStrokeStyle(paintStyle, paintStyle);
     } else if (paint.color != null) {
       final String colorString = paint.color.toCssString();

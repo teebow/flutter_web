@@ -985,6 +985,7 @@ class PaintDrawParagraph extends PaintCommand {
 }
 
 List<dynamic> _serializePaintToCssPaint(ui.PaintData paint) {
+  final EngineGradient engineShader = paint.shader;
   return <dynamic>[
     paint.blendMode?.index,
     paint.style?.index,
@@ -992,7 +993,7 @@ List<dynamic> _serializePaintToCssPaint(ui.PaintData paint) {
     paint.strokeCap?.index,
     paint.isAntiAlias,
     paint.color.toCssString(),
-    paint.shader?.webOnlySerializeToCssPaint(),
+    engineShader?.webOnlySerializeToCssPaint(),
     paint.maskFilter?.webOnlySerializeToCssPaint(),
     paint.filterQuality?.index,
     paint.colorFilter?.webOnlySerializeToCssPaint(),
