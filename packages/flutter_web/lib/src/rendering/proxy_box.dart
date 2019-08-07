@@ -1,6 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// Synced. * Contains Web DELTA *
 
 import 'dart:async';
 
@@ -3506,9 +3507,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool button,
     bool header,
     bool textField,
+    bool readOnly,
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
+    bool multiline,
     bool scopesRoute,
     bool namesRoute,
     bool hidden,
@@ -3543,53 +3546,55 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     VoidCallback onDidLoseAccessibilityFocus,
     Map<CustomSemanticsAction, VoidCallback> customSemanticsActions,
   }) : assert(container != null),
-       _container = container,
-       _explicitChildNodes = explicitChildNodes,
-       _excludeSemantics = excludeSemantics,
-       _enabled = enabled,
-       _checked = checked,
-       _toggled = toggled,
-       _selected = selected,
-       _button = button,
-       _header = header,
-       _textField = textField,
-       _focused = focused,
-       _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
-       _obscured = obscured,
-       _scopesRoute = scopesRoute,
-       _namesRoute = namesRoute,
-       _liveRegion = liveRegion,
-       _hidden = hidden,
-       _image = image,
-       _onDismiss = onDismiss,
-       _label = label,
-       _value = value,
-       _increasedValue = increasedValue,
-       _decreasedValue = decreasedValue,
-       _hint = hint,
-       _hintOverrides = hintOverrides,
-       _textDirection = textDirection,
-       _sortKey = sortKey,
-       _onTap = onTap,
-       _onLongPress = onLongPress,
-       _onScrollLeft = onScrollLeft,
-       _onScrollRight = onScrollRight,
-       _onScrollUp = onScrollUp,
-       _onScrollDown = onScrollDown,
-       _onIncrease = onIncrease,
-       _onDecrease = onDecrease,
-       _onCopy = onCopy,
-       _onCut = onCut,
-       _onPaste = onPaste,
-       _onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter,
-       _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
-       _onMoveCursorForwardByWord = onMoveCursorForwardByWord,
-       _onMoveCursorBackwardByWord = onMoveCursorBackwardByWord,
-       _onSetSelection = onSetSelection,
-       _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
-       _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
-       _customSemanticsActions = customSemanticsActions,
-       super(child);
+        _container = container,
+        _explicitChildNodes = explicitChildNodes,
+        _excludeSemantics = excludeSemantics,
+        _enabled = enabled,
+        _checked = checked,
+        _toggled = toggled,
+        _selected = selected,
+        _button = button,
+        _header = header,
+        _textField = textField,
+        _readOnly = readOnly,
+        _focused = focused,
+        _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
+        _obscured = obscured,
+        _multiline = multiline,
+        _scopesRoute = scopesRoute,
+        _namesRoute = namesRoute,
+        _liveRegion = liveRegion,
+        _hidden = hidden,
+        _image = image,
+        _onDismiss = onDismiss,
+        _label = label,
+        _value = value,
+        _increasedValue = increasedValue,
+        _decreasedValue = decreasedValue,
+        _hint = hint,
+        _hintOverrides = hintOverrides,
+        _textDirection = textDirection,
+        _sortKey = sortKey,
+        _onTap = onTap,
+        _onLongPress = onLongPress,
+        _onScrollLeft = onScrollLeft,
+        _onScrollRight = onScrollRight,
+        _onScrollUp = onScrollUp,
+        _onScrollDown = onScrollDown,
+        _onIncrease = onIncrease,
+        _onDecrease = onDecrease,
+        _onCopy = onCopy,
+        _onCut = onCut,
+        _onPaste = onPaste,
+        _onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter,
+        _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
+        _onMoveCursorForwardByWord = onMoveCursorForwardByWord,
+        _onMoveCursorBackwardByWord = onMoveCursorBackwardByWord,
+        _onSetSelection = onSetSelection,
+        _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
+        _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
+        _customSemanticsActions = customSemanticsActions,
+        super(child);
 
   /// If 'container' is true, this [RenderObject] will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
@@ -3709,6 +3714,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// If non-null, sets the [SemanticsNode.isReadOnly] semantic to the given value.
+  bool get readOnly => _readOnly;
+  bool _readOnly;
+  set readOnly(bool value) {
+    if (readOnly == value)
+      return;
+    _readOnly = value;
+    markNeedsSemanticsUpdate();
+  }
+
   /// If non-null, sets the [SemanticsNode.isFocused] semantic to the given value.
   bool get focused => _focused;
   bool _focused;
@@ -3738,6 +3753,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (obscured == value)
       return;
     _obscured = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isMultiline] semantic to the given
+  /// value.
+  bool get multiline => _multiline;
+  bool _multiline;
+  set multiline(bool value) {
+    if (multiline == value)
+      return;
+    _multiline = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4314,9 +4340,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
     assert((scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
-      'explicitChildNodes must be set to true if scopes route is true');
+    'explicitChildNodes must be set to true if scopes route is true');
     assert(!(toggled == true && checked == true),
-      'A semantics node cannot be toggled and checked at the same time');
+    'A semantics node cannot be toggled and checked at the same time');
 
     if (enabled != null)
       config.isEnabled = enabled;
@@ -4332,12 +4358,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isHeader = header;
     if (textField != null)
       config.isTextField = textField;
+    if (readOnly != null)
+      config.isReadOnly = readOnly;
     if (focused != null)
       config.isFocused = focused;
     if (inMutuallyExclusiveGroup != null)
       config.isInMutuallyExclusiveGroup = inMutuallyExclusiveGroup;
     if (obscured != null)
       config.isObscured = obscured;
+    if (multiline != null)
+      config.isMultiline = multiline;
     if (hidden != null)
       config.isHidden = hidden;
     if (image != null)

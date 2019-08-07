@@ -491,6 +491,26 @@ class PaintingContext extends ClipContext {
     }
   }
 
+  /// Blend further painting with a color filter.
+  ///
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `colorFilter` is the [ColorFilter] value to use when blending the
+  ///   painting done by `painter`.
+  /// * `painter` is a callback that will paint with the `colorFilter` applied.
+  ///   This function calls the `painter` synchronously.
+  ///
+  /// A [RenderObject] that uses this function is very likely to require its
+  /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
+  /// ancestor render objects that this render object will include a composited
+  /// layer, which, for example, causes them to use composited clips.
+  ColorFilterLayer pushColorFilter(Offset offset, ColorFilter colorFilter, PaintingContextCallback painter, {ColorFilterLayer oldLayer}) {
+    assert(colorFilter != null);
+    oldLayer = ColorFilterLayer(colorFilter: colorFilter);
+    pushLayer(oldLayer, painter, offset);
+    return oldLayer;
+  }
+
   /// Transform further painting using a matrix.
   ///
   /// * `needsCompositing` is whether the child needs compositing. Typically
@@ -1337,7 +1357,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         // displaying the truncated children is really useful for command line
         // users. Inspector users can see the full tree by clicking on the
         // render object so this may not be that useful.
-        yield describeForError('This RenderObject', style: DiagnosticsTreeStyle.truncateChildren);
+        yield describeForError('RenderObject', style: DiagnosticsTreeStyle.truncateChildren);
       }
     ));
   }
@@ -3690,9 +3710,10 @@ class _SemanticsGeometry {
       } else {
         _semanticsClipRect = _intersectRects(_semanticsClipRect, parent.describeApproximatePaintClip(child));
       }
-      _semanticsClipRect = _transformRect(_semanticsClipRect, parent, child);
-      _paintClipRect = _transformRect(_paintClipRect, parent, child);
-      parent.applyPaintTransform(child, _transform);
+      _temporaryTransformHolder.setIdentity(); // clears data from previous call(s)
+      _applyIntermediatePaintTransforms(parent, child, _transform, _temporaryTransformHolder);
+      _semanticsClipRect = _transformRect(_semanticsClipRect, _temporaryTransformHolder);
+      _paintClipRect = _transformRect(_paintClipRect, _temporaryTransformHolder);
     }
 
     final RenderObject owner = ancestors.first;
@@ -3705,20 +3726,51 @@ class _SemanticsGeometry {
     }
   }
 
-  // Reduces temporary allocations in _transformRect.
-  // TODO(flutter_web): upstream optimization.
-  static Matrix4 _transformRectTransform;
+  // A matrix used to store transient transform data.
+  //
+  // Reusing this matrix avoids allocating a new matrix every time a temporary
+  // matrix is needed.
+  //
+  // This instance should never be returned to the caller. Otherwise, the data
+  // stored in it will be overwritten unpredictably by subsequent reuses.
+  static final Matrix4 _temporaryTransformHolder = Matrix4.zero();
 
   /// From parent to child coordinate system.
-  /// TODO(flutter_web): upstream optimization.
-  static Rect _transformRect(
-      Rect rect, RenderObject parent, RenderObject child) {
-    if (rect == null) return null;
-    if (rect.isEmpty) return Rect.zero;
-    final Matrix4 transform = _transformRectTransform ??= Matrix4.zero();
-    transform.setIdentity();
-    parent.applyPaintTransform(child, transform);
+  static Rect _transformRect(Rect rect, Matrix4 transform) {
+    assert(transform != null);
+    if (rect == null)
+      return null;
+    if (rect.isEmpty || transform.isZero())
+      return Rect.zero;
     return MatrixUtils.inverseTransformRect(transform, rect);
+  }
+
+  // Calls applyPaintTransform on all of the render objects between [child] and
+  // [ancestor]. This method handles cases where the immediate semantic parent
+  // is not the immediate render object parent of the child.
+  //
+  // It will mutate both transform and clipRectTransform.
+  static void _applyIntermediatePaintTransforms(
+      RenderObject ancestor,
+      RenderObject child,
+      Matrix4 transform,
+      Matrix4 clipRectTransform,
+      ) {
+    assert(ancestor != null);
+    assert(child != null);
+    assert(transform != null);
+    assert(clipRectTransform != null);
+    assert(clipRectTransform.isIdentity());
+    RenderObject intermediateParent = child.parent;
+    assert(intermediateParent != null);
+    while (intermediateParent != ancestor) {
+      intermediateParent.applyPaintTransform(child, transform);
+      intermediateParent = intermediateParent.parent;
+      child = child.parent;
+      assert(intermediateParent != null);
+    }
+    ancestor.applyPaintTransform(child, transform);
+    ancestor.applyPaintTransform(child, clipRectTransform);
   }
 
   static Rect _intersectRects(Rect a, Rect b) {
@@ -3748,4 +3800,21 @@ class _SemanticsGeometry {
   ///  * [SemanticsFlag.isHidden] for the purpose of marking a node as hidden.
   bool get markAsHidden => _markAsHidden;
   bool _markAsHidden = false;
+}
+
+/// A class that creates [DiagnosticsNode] by wrapping [RenderObject.debugCreator].
+///
+/// Attach a [DiagnosticsDebugCreator] into [FlutterErrorDetails.informationCollector]
+/// when a [RenderObject.debugCreator] is available. This will lead to improved
+/// error message.
+class DiagnosticsDebugCreator extends DiagnosticsProperty<Object> {
+  /// Create a [DiagnosticsProperty] with its [value] initialized to input
+  /// [RenderObject.debugCreator].
+  DiagnosticsDebugCreator(Object value):
+        assert(value != null),
+        super(
+          'debugCreator',
+          value,
+          level: DiagnosticLevel.hidden
+      );
 }

@@ -14,7 +14,7 @@ js.JsArray<double> makeSkPoint(ui.Offset point) {
 }
 
 js.JsObject makeSkPaint(ui.Paint paint) {
-  final skPaint = js.JsObject(canvasKit['SkPaint']);
+  final dynamic skPaint = js.JsObject(canvasKit['SkPaint']);
 
   if (paint.shader != null) {
     final EngineGradient engineShader = paint.shader;
@@ -201,10 +201,10 @@ const List<int> _skMatrixIndexToMatrix4Index = <int>[
 /// Converts a 4x4 Flutter matrix (represented as a [Float64List]) to an
 /// SkMatrix, which is a 3x3 transform matrix.
 js.JsArray<double> makeSkMatrix(Float64List matrix4) {
-  js.JsArray<double> skMatrix = new js.JsArray<double>();
+  final js.JsArray<double> skMatrix = js.JsArray<double>();
   skMatrix.length = 9;
   for (int i = 0; i < 9; ++i) {
-    int matrix4Index = _skMatrixIndexToMatrix4Index[i];
+    final int matrix4Index = _skMatrixIndexToMatrix4Index[i];
     if (matrix4Index < matrix4.length)
       skMatrix[i] = matrix4[matrix4Index];
     else
@@ -260,8 +260,8 @@ void drawSkShadow(
 
   skCanvas.callMethod('drawShadow', <dynamic>[
     path._skPath,
-    js.JsArray<double>.from([0, 0, elevation]),
-    js.JsArray<double>.from([shadowX, shadowY, 600]),
+    js.JsArray<double>.from(<double>[0, 0, elevation]),
+    js.JsArray<double>.from(<double>[shadowX, shadowY, 600]),
     800,
     ambientColor.value,
     spotColor.value,

@@ -8,13 +8,75 @@ import 'dart:math' show min, max;
 import 'package:flutter_web/foundation.dart';
 import 'package:flutter_web/gestures.dart';
 import 'package:flutter_web/services.dart';
-import 'package:flutter_web_ui/ui.dart' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle;
+import 'package:flutter_web_ui/ui.dart' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment;
 
 import 'basic_types.dart';
 import 'strut_style.dart';
 import 'text_span.dart';
 
 export 'package:flutter_web/services.dart' show TextRange, TextSelection;
+
+/// Holds the [Size] and baseline required to represent the dimensions of
+/// a placeholder in text.
+///
+/// Placeholders specify an empty space in the text layout, which is used
+/// to later render arbitrary inline widgets into defined by a [WidgetSpan].
+///
+/// The [size] and [alignment] properties are required and cannot be null.
+///
+/// See also:
+///
+///  * [WidgetSpan], a subclass of [InlineSpan] and [PlaceholderSpan] that
+///    represents an inline widget embedded within text. The space this
+///    widget takes is indicated by a placeholder.
+///  * [RichText], a text widget that supports text inline widgets.
+@immutable
+class PlaceholderDimensions {
+  /// Constructs a [PlaceholderDimensions] with the specified parameters.
+  ///
+  /// The `size` and `alignment` are required as a placeholder's dimensions
+  /// require at least `size` and `alignment` to be fully defined.
+  const PlaceholderDimensions({
+    @required this.size,
+    @required this.alignment,
+    this.baseline,
+    this.baselineOffset,
+  }) : assert(size != null),
+        assert(alignment != null);
+
+  /// Width and height dimensions of the placeholder.
+  final Size size;
+
+  /// How to align the placeholder with the text.
+  ///
+  /// See also:
+  ///
+  ///  * [baseline], the baseline to align to when using
+  ///    [ui.PlaceholderAlignment.baseline],
+  ///    [ui.PlaceholderAlignment.aboveBaseline],
+  ///    or [ui.PlaceholderAlignment.underBaseline].
+  ///  * [baselineOffset], the distance of the alphabetic baseline from the upper
+  ///    edge of the placeholder.
+  final ui.PlaceholderAlignment alignment;
+
+  /// Distance of the [baseline] from the upper edge of the placeholder.
+  ///
+  /// Only used when [alignment] is [ui.PlaceholderAlignment.baseline].
+  final double baselineOffset;
+
+  /// The [TextBaseline] to align to. Used with:
+  ///
+  ///  * [ui.PlaceholderAlignment.baseline]
+  ///  * [ui.PlaceholderAlignment.aboveBaseline]
+  ///  * [ui.PlaceholderAlignment.underBaseline]
+  ///  * [ui.PlaceholderAlignment.middle]
+  final TextBaseline baseline;
+
+  @override
+  String toString() {
+    return 'PlaceholderDimensions($size, $baseline)';
+  }
+}
 
 /// The different ways of considering the width of one or more lines of text.
 ///

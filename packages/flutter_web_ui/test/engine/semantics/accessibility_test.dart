@@ -11,7 +11,7 @@ import 'package:test/test.dart';
 const MessageCodec<dynamic> codec = StandardMessageCodec();
 const String testMessage = 'This is an tooltip.';
 const Map<dynamic, dynamic> testInput = <dynamic, dynamic>{
-  'data': {'message': testMessage}
+  'data': <dynamic, dynamic>{'message': testMessage}
 };
 
 void main() {

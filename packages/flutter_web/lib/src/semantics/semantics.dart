@@ -1,6 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// Synced 2019-08-07T09:50:32.354540.
 
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -11,7 +12,7 @@ import 'package:flutter_web/services.dart';
 import 'package:flutter_web_ui/ui.dart' as ui;
 import 'package:flutter_web_ui/ui.dart'
     show Offset, Rect, SemanticsAction, SemanticsFlag, TextDirection;
-import 'package:flutter_web/src/util.dart';
+import 'binding.dart' show SemanticsBinding;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'semantics_event.dart';
@@ -67,8 +68,7 @@ class SemanticsTag {
   final String name;
 
   @override
-  String toString() =>
-      assertionsEnabled ? '$runtimeType($name)' : super.toString();
+  String toString() => '$runtimeType($name)';
 }
 
 /// An identifier of a custom semantics action.
@@ -138,10 +138,7 @@ class CustomSemanticsAction {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'CustomSemanticsAction(${_ids[this]}, label:$label, hint:$hint, action:$action)';
-    }
-    return super.toString();
+    return 'CustomSemanticsAction(${_ids[this]}, label:$label, hint:$hint, action:$action)';
   }
 
   // Logic to assign a unique id to each custom action without requiring
@@ -350,8 +347,6 @@ class SemanticsData extends Diagnosticable {
   ///
   ///  * [CustomSemanticsAction], for an explanation of custom actions.
   final List<int> customSemanticsActionIds;
-
-
 
   /// Whether [flags] contains the given flag.
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
@@ -571,16 +566,16 @@ class SemanticsProperties extends DiagnosticableTree {
     this.button,
     this.header,
     this.textField,
+    this.readOnly,
     this.focused,
     this.inMutuallyExclusiveGroup,
     this.hidden,
     this.obscured,
+    this.multiline,
     this.scopesRoute,
     this.namesRoute,
     this.image,
     this.liveRegion,
-    // TODO(flutter_web): upstream.
-    this.multiline,
     this.label,
     this.value,
     this.increasedValue,
@@ -659,6 +654,13 @@ class SemanticsProperties extends DiagnosticableTree {
   /// text field.
   final bool textField;
 
+  /// If non-null, indicates that this subtree is read only.
+  ///
+  /// Only applicable when [textField] is true
+  ///
+  /// TalkBack/VoiceOver will treat it as non-editable text field.
+  final bool readOnly;
+
   /// If non-null, whether the node currently holds input focus.
   ///
   /// At most one node in the tree should hold input focus at any point in time.
@@ -699,6 +701,15 @@ class SemanticsProperties extends DiagnosticableTree {
   /// that the text field contains a password (or other sensitive information).
   /// Doing so instructs screen readers to not read out the [value].
   final bool obscured;
+
+  /// Whether the [value] is coming from a field that supports multi-line text
+  /// editing.
+  ///
+  /// This option is only meaningful when [textField] is true to indicate
+  /// whether it's a single-line or multi-line text field.
+  ///
+  /// This option is null when [textField] is false.
+  final bool multiline;
 
   /// If non-null, whether the node corresponds to the root of a subtree for
   /// which a route name should be announced.
@@ -749,13 +760,6 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [SemanticsConfiguration.liveRegion], for a full description of a live region.
   ///  * [UpdateLiveRegionEvent], to trigger a polite announcement of a live region.
   final bool liveRegion;
-
-  // TODO(flutter_web): upstream.
-  /// Whether the [value] is coming from a field that supports multi-line.
-  ///
-  /// This option is only meaningful when used in combination with [textField]
-  /// to indicate whether it's a single-line or multi-line text field.
-  final bool multiline;
 
   /// Provides a textual description of the widget.
   ///
@@ -1169,6 +1173,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   Rect _rect = Rect.zero;
   set rect(Rect value) {
     assert(value != null);
+    assert(value.isFinite, '$this (with $owner) tried to set a non-finite rect.');
     if (_rect != value) {
       _rect = value;
       _markDirty();
@@ -1289,30 +1294,31 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     assert(!newChildren.any((SemanticsNode child) => child == this));
     assert(() {
       if (identical(newChildren, _children)) {
-        final StringBuffer mutationErrors = StringBuffer();
+        final List<DiagnosticsNode> mutationErrors = <DiagnosticsNode>[];
         if (newChildren.length != _debugPreviousSnapshot.length) {
-          mutationErrors.writeln(
+          mutationErrors.add(ErrorDescription(
             'The list\'s length has changed from ${_debugPreviousSnapshot.length} '
             'to ${newChildren.length}.'
-          );
+          ));
         } else {
           for (int i = 0; i < newChildren.length; i++) {
             if (!identical(newChildren[i], _debugPreviousSnapshot[i])) {
-              mutationErrors.writeln(
-                'Child node at position $i was replaced:\n'
-                'Previous child: ${newChildren[i]}\n'
-                'New child: ${_debugPreviousSnapshot[i]}\n'
-              );
+              if (mutationErrors.isNotEmpty) {
+                mutationErrors.add(ErrorSpacer());
+              }
+              mutationErrors.add(ErrorDescription('Child node at position $i was replaced:'));
+              mutationErrors.add(newChildren[i].toDiagnosticsNode(name: 'Previous child', style: DiagnosticsTreeStyle.singleLine));
+              mutationErrors.add(_debugPreviousSnapshot[i].toDiagnosticsNode(name: 'New child', style: DiagnosticsTreeStyle.singleLine));
             }
           }
         }
         if (mutationErrors.isNotEmpty) {
-          throw FlutterError(
-            'Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.\n'
-            'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.\n'
-            'Error details:\n'
-            '$mutationErrors'
-          );
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.'),
+            ErrorHint('Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.'),
+            ErrorDescription('Error details:'),
+            ...mutationErrors
+          ]);
         }
       }
       assert(!newChildren.any((SemanticsNode node) => node.isMergedIntoParent) || isPartOfNodeMerging);
@@ -1326,7 +1332,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       return true;
     }());
     assert(() {
-      final Set<SemanticsNode> seenChildren = Set<SemanticsNode>();
+      final Set<SemanticsNode> seenChildren = <SemanticsNode>{};
       for (SemanticsNode child in newChildren)
         assert(seenChildren.add(child)); // check for duplicate adds
       return true;
@@ -1659,6 +1665,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   TextSelection get textSelection => _textSelection;
   TextSelection _textSelection;
 
+  /// If this node represents a text field, this indicates whether or not it's
+  /// a multi-line text field.
+  bool get isMultiline => _isMultiline;
+  bool _isMultiline;
+
   /// The total number of scrollable children that contribute to semantics.
   ///
   /// If the number of children are unknown or unbounded, this value will be
@@ -1682,7 +1693,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///  * [ScrollPosition.pixels], from where this value is usually taken.
   double get scrollPosition => _scrollPosition;
   double _scrollPosition;
-
 
   /// Indicates the maximum in-range value for [scrollPosition] if the node is
   /// scrollable.
@@ -1719,10 +1729,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///  * [UiKitView], which is the platform view for iOS.
   int get platformViewId => _platformViewId;
   int _platformViewId;
-
-  // TODO(flutter_web): upstream.
-  bool get isMultiline => _isMultiline;
-  bool _isMultiline;
 
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
@@ -1765,6 +1771,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _customSemanticsActions = Map<CustomSemanticsAction, VoidCallback>.from(config._customSemanticsActions);
     _actionsAsBits = config._actionsAsBits;
     _textSelection = config._textSelection;
+    _isMultiline = config.isMultiline;
     _scrollPosition = config._scrollPosition;
     _scrollExtentMax = config._scrollExtentMax;
     _scrollExtentMin = config._scrollExtentMin;
@@ -1773,8 +1780,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _scrollIndex = config.scrollIndex;
     indexInParent = config.indexInParent;
     _platformViewId = config._platformViewId;
-    // TODO(flutter_web): upstream.
-    _isMultiline = config.isMultiline;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     assert(
@@ -1812,7 +1817,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     int platformViewId = _platformViewId;
     final double elevation = _elevation;
     double thickness = _thickness;
-    final Set<int> customSemanticsActionIds = Set<int>();
+    final Set<int> customSemanticsActionIds = <int>{};
     for (CustomSemanticsAction action in _customSemanticsActions.keys)
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
     if (hintOverrides != null) {
@@ -1837,7 +1842,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         assert(node.isMergedIntoParent);
         flags |= node._flags;
         actions |= node._actionsAsBits;
-        _isMultiline ??= node._isMultiline;
         textDirection ??= node._textDirection;
         textSelection ??= node._textSelection;
         scrollChildCount ??= node._scrollChildCount;
@@ -1853,7 +1857,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         if (decreasedValue == '' || decreasedValue == null)
           decreasedValue = node._decreasedValue;
         if (node.tags != null) {
-          mergedTags ??= Set<SemanticsTag>();
+          mergedTags ??= <SemanticsTag>{};
           mergedTags.addAll(node.tags);
         }
         if (node._customSemanticsActions != null) {
@@ -1971,12 +1975,12 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       textDirection: data.textDirection,
       textSelectionBase: data.textSelection != null ? data.textSelection.baseOffset : -1,
       textSelectionExtent: data.textSelection != null ? data.textSelection.extentOffset : -1,
-      platformViewId: data.platformViewId != null ? data.platformViewId : -1,
-      scrollChildren: data.scrollChildCount != null ? data.scrollChildCount : 0,
-      scrollIndex: data.scrollIndex != null ? data.scrollIndex : 0 ,
-      scrollPosition: data.scrollPosition != null ? data.scrollPosition : double.nan,
-      scrollExtentMax: data.scrollExtentMax != null ? data.scrollExtentMax : double.nan,
-      scrollExtentMin: data.scrollExtentMin != null ? data.scrollExtentMin : double.nan,
+      platformViewId: data.platformViewId ?? -1,
+      scrollChildren: data.scrollChildCount ?? 0,
+      scrollIndex: data.scrollIndex ?? 0 ,
+      scrollPosition: data.scrollPosition ?? double.nan,
+      scrollExtentMax: data.scrollExtentMax ?? double.nan,
+      scrollExtentMin: data.scrollExtentMin ?? double.nan,
       transform: data.transform?.storage ?? _kIdentityTransform,
       elevation: data.elevation,
       thickness: data.thickness,
@@ -2094,6 +2098,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       }
       properties.add(DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
+    properties.add(IterableProperty<String>('tags', tags?.map((SemanticsTag tag) => tag.name), defaultValue: null));
     final List<String> actions = _actions.keys.map<String>((SemanticsAction action) => describeEnum(action)).toList()..sort();
     final List<String> customSemanticsActions = _customSemanticsActions.keys
       .map<String>((CustomSemanticsAction action) => action.label)
@@ -2104,9 +2109,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
     properties.add(FlagProperty('isHidden', value: hasFlag(SemanticsFlag.isHidden), ifTrue: 'HIDDEN'));
-    // TODO(flutter_web): upstream.
-    properties.add(FlagProperty('isMultiline',
-        value: hasFlag(SemanticsFlag.isMultiline), ifTrue: 'MULTI-LINE'));
     properties.add(StringProperty('label', _label, defaultValue: ''));
     properties.add(StringProperty('value', _value, defaultValue: ''));
     properties.add(StringProperty('increasedValue', _increasedValue, defaultValue: ''));
@@ -2123,7 +2125,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
-    properties.add(DoubleProperty('thicknes', thickness, defaultValue: 0.0));
+    properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -2194,6 +2196,7 @@ class _BoxEdge implements Comparable<_BoxEdge> {
     @required this.node,
   }) : assert(isLeadingEdge != null),
        assert(offset != null),
+       assert(offset.isFinite),
        assert(node != null);
 
   /// True if the edge comes before the seconds edge along the traversal
@@ -2294,12 +2297,9 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
       horizontalGroups = horizontalGroups.reversed.toList();
     }
 
-    final List<SemanticsNode> result = <SemanticsNode>[];
-    for (_SemanticsSortGroup group in horizontalGroups) {
-      final List<SemanticsNode> sortedKnotNodes = group.sortedWithinKnot();
-      result.addAll(sortedKnotNodes);
-    }
-    return result;
+    return horizontalGroups
+      .expand((_SemanticsSortGroup group) => group.sortedWithinKnot())
+      .toList();
   }
 
   /// Sorts [nodes] where nodes intersect both vertically and horizontally.
@@ -2349,7 +2349,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
     }
 
     final List<int> sortedIds = <int>[];
-    final Set<int> visitedIds = Set<int>();
+    final Set<int> visitedIds = <int>{};
     final List<SemanticsNode> startNodes = nodes.toList()..sort((SemanticsNode a, SemanticsNode b) {
       final Offset aTopLeft = _pointInParentCoordinates(a, a.rect.topLeft);
       final Offset bTopLeft = _pointInParentCoordinates(b, b.rect.topLeft);
@@ -2400,6 +2400,7 @@ Offset _pointInParentCoordinates(SemanticsNode node, Offset point) {
 List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDirection textDirection) {
   final List<_BoxEdge> edges = <_BoxEdge>[];
   for (SemanticsNode child in children) {
+    assert(child.rect.isFinite);
     // Using a small delta to shrink child rects removes overlapping cases.
     final Rect childRect = child.rect.deflate(0.1);
     edges.add(_BoxEdge(
@@ -2436,12 +2437,9 @@ List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDi
   }
   verticalGroups.sort();
 
-  final List<SemanticsNode> result = <SemanticsNode>[];
-  for (_SemanticsSortGroup group in verticalGroups) {
-    final List<SemanticsNode> sortedGroupNodes = group.sortedWithinVerticalGroup();
-    result.addAll(sortedGroupNodes);
-  }
-  return result;
+  return verticalGroups
+    .expand((_SemanticsSortGroup group) => group.sortedWithinVerticalGroup())
+    .toList();
 }
 
 /// The implementation of [Comparable] that implements the ordering of
@@ -2489,9 +2487,9 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
 /// obtain a [SemanticsHandle]. This will create a [SemanticsOwner] if
 /// necessary.
 class SemanticsOwner extends ChangeNotifier {
-  final Set<SemanticsNode> _dirtyNodes = Set<SemanticsNode>();
+  final Set<SemanticsNode> _dirtyNodes = <SemanticsNode>{};
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
-  final Set<SemanticsNode> _detachedNodes = Set<SemanticsNode>();
+  final Set<SemanticsNode> _detachedNodes = <SemanticsNode>{};
   final Map<int, CustomSemanticsAction> _actions = <int, CustomSemanticsAction>{};
 
   /// The root node of the semantics tree, if any.
@@ -2511,7 +2509,7 @@ class SemanticsOwner extends ChangeNotifier {
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty)
       return;
-    final Set<int> customSemanticsActionIds = Set<int>();
+    final Set<int> customSemanticsActionIds = <int>{};
     final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
       final List<SemanticsNode> localDirtyNodes = _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
@@ -2552,7 +2550,7 @@ class SemanticsOwner extends ChangeNotifier {
       final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId);
       builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
     }
-    ui.window.updateSemantics(builder.build());
+    SemanticsBinding.instance.window.updateSemantics(builder.build());
     notifyListeners();
   }
 
@@ -2640,8 +2638,7 @@ class SemanticsOwner extends ChangeNotifier {
   }
 
   @override
-  String toString() =>
-      assertionsEnabled ? describeIdentity(this) : super.toString();
+  String toString() => describeIdentity(this);
 }
 
 /// Describes the semantic information associated with the owning
@@ -3058,7 +3055,8 @@ class SemanticsConfiguration {
   set onSetSelection(SetSelectionHandler value) {
     assert(value != null);
     _addAction(SemanticsAction.setSelection, (dynamic args) {
-      final Map<String, int> selection = args;
+      assert(args != null && args is Map);
+      final Map<String, int> selection = args.cast<String, int>();
       assert(selection != null && selection['base'] != null && selection['extent'] != null);
       value(TextSelection(
         baseOffset: selection['base'],
@@ -3531,6 +3529,14 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isTextField, value);
   }
 
+  /// Whether the owning [RenderObject] is read only.
+  ///
+  /// Only applicable when [isTextField] is true.
+  bool get isReadOnly => _hasFlag(SemanticsFlag.isReadOnly);
+  set isReadOnly(bool value) {
+    _setFlag(SemanticsFlag.isReadOnly, value);
+  }
+
   /// Whether the [value] should be obscured.
   ///
   /// This option is usually set in combination with [textField] to indicate
@@ -3539,6 +3545,15 @@ class SemanticsConfiguration {
   bool get isObscured => _hasFlag(SemanticsFlag.isObscured);
   set isObscured(bool value) {
     _setFlag(SemanticsFlag.isObscured, value);
+  }
+
+  /// Whether the text field is multi-line.
+  ///
+  /// This option is usually set in combination with [textField] to indicate
+  /// that the text field is configured to be multi-line.
+  bool get isMultiline => _hasFlag(SemanticsFlag.isMultiline);
+  set isMultiline(bool value) {
+    _setFlag(SemanticsFlag.isMultiline, value);
   }
 
   /// Whether the platform can scroll the semantics node when the user attempts
@@ -3551,16 +3566,6 @@ class SemanticsConfiguration {
   bool get hasImplicitScrolling => _hasFlag(SemanticsFlag.hasImplicitScrolling);
   set hasImplicitScrolling(bool value) {
     _setFlag(SemanticsFlag.hasImplicitScrolling, value);
-  }
-
-  // TODO(flutter_web): upstream.
-  /// Whether the text field is multi-line.
-  ///
-  /// This option is usually set in combination with [textField] to indicate
-  /// that the text field is configured to be multi-line.
-  bool get isMultiline => _hasFlag(SemanticsFlag.isMultiline);
-  set isMultiline(bool value) {
-    _setFlag(SemanticsFlag.isMultiline, value);
   }
 
   /// The currently selected text (or the position of the cursor) within [value]
@@ -3651,7 +3656,7 @@ class SemanticsConfiguration {
   ///  * [RenderSemanticsGestureHandler.excludeFromScrolling] for an example of
   ///    how tags are used.
   void addTagForChildren(SemanticsTag tag) {
-    _tagsForChildren ??= Set<SemanticsTag>();
+    _tagsForChildren ??= <SemanticsTag>{};
     _tagsForChildren.add(tag);
   }
 

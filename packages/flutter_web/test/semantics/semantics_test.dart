@@ -1,6 +1,7 @@
 // Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// Synced. * Contains Web DELTA *
 
 import 'package:flutter_web/rendering.dart';
 import 'package:flutter_web/semantics.dart';
@@ -322,39 +323,38 @@ void main() {
     expect(
       minimalProperties.toStringDeep(),
       'SemanticsNode#1\n'
-      '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
-      '   invisible\n',
+          '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
+          '   invisible\n',
     );
 
     expect(
       minimalProperties.toStringDeep(minLevel: DiagnosticLevel.hidden),
       'SemanticsNode#1\n'
-      '   owner: null\n'
-      '   isMergedIntoParent: false\n'
-      '   mergeAllDescendantsIntoThisNode: false\n'
-      '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
-      '   actions: []\n'
-      '   customActions: []\n'
-      '   flags: []\n'
-      '   invisible\n'
-      '   isHidden: false\n'
-      // TODO(flutter_web): upstream.
-      '   isMultiline: false\n'
-      '   label: ""\n'
-      '   value: ""\n'
-      '   increasedValue: ""\n'
-      '   decreasedValue: ""\n'
-      '   hint: ""\n'
-      '   textDirection: null\n'
-      '   sortKey: null\n'
-      '   platformViewId: null\n'
-      '   scrollChildren: null\n'
-      '   scrollIndex: null\n'
-      '   scrollExtentMin: null\n'
-      '   scrollPosition: null\n'
-      '   scrollExtentMax: null\n'
-      '   elevation: 0.0\n'
-      '   thicknes: 0.0\n',
+          '   owner: null\n'
+          '   isMergedIntoParent: false\n'
+          '   mergeAllDescendantsIntoThisNode: false\n'
+          '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
+          '   tags: null\n'
+          '   actions: []\n'
+          '   customActions: []\n'
+          '   flags: []\n'
+          '   invisible\n'
+          '   isHidden: false\n'
+          '   label: ""\n'
+          '   value: ""\n'
+          '   increasedValue: ""\n'
+          '   decreasedValue: ""\n'
+          '   hint: ""\n'
+          '   textDirection: null\n'
+          '   sortKey: null\n'
+          '   platformViewId: null\n'
+          '   scrollChildren: null\n'
+          '   scrollIndex: null\n'
+          '   scrollExtentMin: null\n'
+          '   scrollPosition: null\n'
+          '   scrollExtentMax: null\n'
+          '   elevation: 0.0\n'
+          '   thickness: 0.0\n',
     );
 
     final SemanticsConfiguration config = SemanticsConfiguration()
@@ -370,22 +370,22 @@ void main() {
       ..textDirection = TextDirection.rtl
       ..sortKey = const OrdinalSortKey(1.0);
     final SemanticsNode allProperties = SemanticsNode()
-      ..rect = Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
+      ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
       ..transform = Matrix4.translation(Vector3(10.0, 10.0, 0.0))
       ..updateWith(config: config, childrenInInversePaintOrder: null);
     expect(
       allProperties.toStringDeep(),
       equalsIgnoringHashCodes(
           'SemanticsNode#2\n'
-          '   STALE\n'
-          '   owner: null\n'
-          '   merge boundary ⛔️\n'
-          '   Rect.fromLTRB(60.0, 20.0, 80.0, 50.0)\n'
-          '   actions: longPress, scrollUp, showOnScreen\n'
-          '   flags: hasCheckedState, isSelected, isButton\n'
-          '   label: "Use all the properties"\n'
-          '   textDirection: rtl\n'
-          '   sortKey: OrdinalSortKey#19df5(order: 1.0)\n'
+              '   STALE\n'
+              '   owner: null\n'
+              '   merge boundary ⛔️\n'
+              '   Rect.fromLTRB(60.0, 20.0, 80.0, 50.0)\n'
+              '   actions: longPress, scrollUp, showOnScreen\n'
+              '   flags: hasCheckedState, isSelected, isButton\n'
+              '   label: "Use all the properties"\n'
+              '   textDirection: rtl\n'
+              '   sortKey: OrdinalSortKey#19df5(order: 1.0)\n'
       ),
     );
     expect(
@@ -394,14 +394,14 @@ void main() {
     );
 
     final SemanticsNode scaled = SemanticsNode()
-      ..rect = Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
+      ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
       ..transform = Matrix4.diagonal3(Vector3(10.0, 10.0, 1.0));
     expect(
       scaled.toStringDeep(),
       'SemanticsNode#3\n'
-      '   STALE\n'
-      '   owner: null\n'
-      '   Rect.fromLTRB(50.0, 10.0, 70.0, 40.0) scaled by 10.0x\n',
+          '   STALE\n'
+          '   owner: null\n'
+          '   Rect.fromLTRB(50.0, 10.0, 70.0, 40.0) scaled by 10.0x\n',
     );
     expect(
       scaled.getSemanticsData().toString(),
@@ -425,36 +425,35 @@ void main() {
     expect(
       actionNode.toStringDeep(minLevel: DiagnosticLevel.hidden),
       'SemanticsNode#1\n'
-      '   STALE\n'
-      '   owner: null\n'
-      '   isMergedIntoParent: false\n'
-      '   mergeAllDescendantsIntoThisNode: false\n'
-      '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
-      '   actions: customAction\n'
-      '   customActions: action1, action2, action3\n'
-      '   flags: []\n'
-      '   invisible\n'
-      '   isHidden: false\n'
-      // TODO(flutter_web): upstream.
-      '   isMultiline: false\n'
-      '   label: ""\n'
-      '   value: ""\n'
-      '   increasedValue: ""\n'
-      '   decreasedValue: ""\n'
-      '   hint: ""\n'
-      '   textDirection: null\n'
-      '   sortKey: null\n'
-      '   platformViewId: null\n'
-      '   scrollChildren: null\n'
-      '   scrollIndex: null\n'
-      '   scrollExtentMin: null\n'
-      '   scrollPosition: null\n'
-      '   scrollExtentMax: null\n'
-      '   elevation: 0.0\n'
-      '   thicknes: 0.0\n',
+          '   STALE\n'
+          '   owner: null\n'
+          '   isMergedIntoParent: false\n'
+          '   mergeAllDescendantsIntoThisNode: false\n'
+          '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
+          '   tags: null\n'
+          '   actions: customAction\n'
+          '   customActions: action1, action2, action3\n'
+          '   flags: []\n'
+          '   invisible\n'
+          '   isHidden: false\n'
+          '   label: ""\n'
+          '   value: ""\n'
+          '   increasedValue: ""\n'
+          '   decreasedValue: ""\n'
+          '   hint: ""\n'
+          '   textDirection: null\n'
+          '   sortKey: null\n'
+          '   platformViewId: null\n'
+          '   scrollChildren: null\n'
+          '   scrollIndex: null\n'
+          '   scrollExtentMin: null\n'
+          '   scrollPosition: null\n'
+          '   scrollExtentMax: null\n'
+          '   elevation: 0.0\n'
+          '   thickness: 0.0\n',
     );
-
   });
+
 
   test('SemanticsConfiguration getter/setter', () {
     final SemanticsConfiguration config = SemanticsConfiguration();
