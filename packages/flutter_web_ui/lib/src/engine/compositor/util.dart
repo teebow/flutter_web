@@ -155,7 +155,9 @@ js.JsObject makeSkPaint(ui.Paint paint) {
       skBlendMode = canvasKit['BlendMode']['Luminosity'];
       break;
   }
-  skPaint.callMethod('setBlendMode', <js.JsObject>[skBlendMode]);
+  if (skBlendMode != null) {
+    skPaint.callMethod('setBlendMode', <js.JsObject>[skBlendMode]);
+  }
 
   skPaint.callMethod('setAntiAlias', <bool>[paint.isAntiAlias]);
 
