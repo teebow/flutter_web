@@ -11,6 +11,8 @@ import 'package:flutter_web/services.dart';
 import 'package:flutter_web_ui/ui.dart' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment;
 
 import 'basic_types.dart';
+import 'inline_span.dart';
+import 'placeholder_span.dart';
 import 'strut_style.dart';
 import 'text_span.dart';
 
@@ -326,8 +328,54 @@ class TextPainter {
     _needsLayout = true;
   }
 
-
   ui.Paragraph _layoutTemplate;
+
+  /// An ordered list of [TextBox]es that bound the positions of the placeholders
+  /// in the paragraph.
+  ///
+  /// Each box corresponds to a [PlaceholderSpan] in the order they were defined
+  /// in the [InlineSpan] tree.
+  List<TextBox> get inlinePlaceholderBoxes => _inlinePlaceholderBoxes;
+  List<TextBox> _inlinePlaceholderBoxes;
+
+  /// An ordered list of scales for each placeholder in the paragraph.
+  ///
+  /// The scale is used as a multiplier on the height, width and baselineOffset of
+  /// the placeholder. Scale is primarily used to handle accessibility scaling.
+  ///
+  /// Each scale corresponds to a [PlaceholderSpan] in the order they were defined
+  /// in the [InlineSpan] tree.
+  List<double> get inlinePlaceholderScales => _inlinePlaceholderScales;
+  List<double> _inlinePlaceholderScales;
+
+  /// Sets the dimensions of each placeholder in [text].
+  ///
+  /// The number of [PlaceholderDimensions] provided should be the same as the
+  /// number of [PlaceholderSpan]s in text. Passing in an empty or null `value`
+  /// will do nothing.
+  ///
+  /// If [layout] is attempted without setting the placeholder dimensions, the
+  /// placeholders will be ignored in the text layout and no valid
+  /// [inlinePlaceholderBoxes] will be returned.
+  void setPlaceholderDimensions(List<PlaceholderDimensions> value) {
+    if (value == null || value.isEmpty || listEquals(value, _placeholderDimensions)) {
+      return;
+    }
+    assert(() {
+      int placeholderCount = 0;
+      text.visitChildren((InlineSpan span) {
+        if (span is PlaceholderSpan) {
+          placeholderCount += 1;
+        }
+        return true;
+      });
+      return placeholderCount;
+    }() == value.length);
+    _placeholderDimensions = value;
+    _needsLayout = true;
+    _paragraph = null;
+  }
+  List<PlaceholderDimensions> _placeholderDimensions;
 
   ui.ParagraphStyle _createParagraphStyle([ TextDirection defaultTextDirection ]) {
     // The defaultTextDirection argument is used for preferredLineHeight in case

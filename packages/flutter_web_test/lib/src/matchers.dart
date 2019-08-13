@@ -302,7 +302,7 @@ Matcher coversSameAreaAs(Path expectedPath,
 ///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-AsyncMatcher matchesGoldenFile(dynamic key) {
+AsyncMatcher matchesGoldenFile(dynamic key, {int version}) {
   throw UnimplementedError('matchesGoldenFile is not yet supported on the Web');
 }
 

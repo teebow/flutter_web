@@ -195,6 +195,54 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   }
 }
 
+/// Toolbar configuration for [EditableText].
+///
+/// Toolbar is a context menu that will show up when user right click or long
+/// press the [EditableText]. It includes several options: cut, copy, paste,
+/// and select all.
+///
+/// [EditableText] and its derived widgets have their own default [ToolbarOptions].
+/// Create a custom [ToolbarOptions] if you want explicit control over the toolbar
+/// option.
+class ToolbarOptions {
+  /// Create a toolbar configuration with given options.
+  ///
+  /// All options default to false if they are not explicitly set.
+  const ToolbarOptions({
+    this.copy = false,
+    this.cut = false,
+    this.paste = false,
+    this.selectAll = false,
+  }) : assert(copy != null),
+        assert(cut != null),
+        assert(paste != null),
+        assert(selectAll != null);
+
+  /// Whether to show copy option in toolbar.
+  ///
+  /// Defaults to false. Must not be null.
+  final bool copy;
+
+  /// Whether to show cut option in toolbar.
+  ///
+  /// If [EditableText.readOnly] is set to true, cut will be disabled regardless.
+  ///
+  /// Defaults to false. Must not be null.
+  final bool cut;
+
+  /// Whether to show paste option in toolbar.
+  ///
+  /// If [EditableText.readOnly] is set to true, paste will be disabled regardless.
+  ///
+  /// Defaults to false. Must not be null.
+  final bool paste;
+
+  /// Whether to show select all option in toolbar.
+  ///
+  /// Defaults to false. Must not be null.
+  final bool selectAll;
+}
+
 /// A basic text input field.
 ///
 /// This widget interacts with the [TextInput] service to let the user edit the
@@ -258,6 +306,7 @@ class EditableText extends StatefulWidget {
     Key key,
     @required this.controller,
     @required this.focusNode,
+    this.readOnly = false,
     this.obscureText = false,
     this.autocorrect = true,
     @required this.style,
@@ -269,7 +318,11 @@ class EditableText extends StatefulWidget {
     this.locale,
     this.textScaleFactor,
     this.maxLines = 1,
+    this.minLines,
+    this.expands = false,
     this.autofocus = false,
+    bool showCursor,
+    this.showSelectionHandles = false,
     this.selectionColor,
     this.selectionControls,
     TextInputType keyboardType,
@@ -290,6 +343,14 @@ class EditableText extends StatefulWidget {
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection,
+    this.scrollController,
+    this.scrollPhysics,
+    this.toolbarOptions = const ToolbarOptions(
+        copy: true,
+        cut: true,
+        paste: true,
+        selectAll: true
+    ),
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -313,6 +374,7 @@ class EditableText extends StatefulWidget {
                  ..addAll(inputFormatters ?? const Iterable<TextInputFormatter>.empty())
              )
            : inputFormatters,
+       showCursor = showCursor ?? !readOnly,
        super(key: key);
 
   /// Controls the text being edited.
@@ -330,6 +392,44 @@ class EditableText extends StatefulWidget {
   /// Defaults to false. Cannot be null.
   /// {@endtemplate}
   final bool obscureText;
+
+  /// {@template flutter.widgets.editableText.readOnly}
+  /// Whether the text can be changed.
+  ///
+  /// When this is set to true, the text cannot be modified
+  /// by any shortcut or keyboard operation. The text is still selectable.
+  ///
+  /// Defaults to false. Must not be null.
+  /// {@endtemplate}
+  final bool readOnly;
+
+  /// Configuration of toolbar options.
+  ///
+  /// By default, all options are enabled. If [readOnly] is true,
+  /// paste and cut will be disabled regardless.
+  final ToolbarOptions toolbarOptions;
+
+  /// Whether to show selection handles.
+  ///
+  /// When a selection is active, there will be two handles at each side of
+  /// boundary, or one handle if the selection is collapsed. The handles can be
+  /// dragged to adjust the selection.
+  ///
+  /// See also:
+  ///
+  ///  * [showCursor], which controls the visibility of the cursor..
+  final bool showSelectionHandles;
+
+  /// {@template flutter.widgets.editableText.showCursor}
+  /// Whether to show cursor.
+  ///
+  /// The cursor refers to the blinking caret when the [EditableText] is focused.
+  ///
+  /// See also:
+  ///
+  ///  * [showSelectionHandles], which controls the visibility of the selection handles.
+  /// {@endtemplate}
+  final bool showCursor;
 
   /// {@template flutter.widgets.editableText.autocorrect}
   /// Whether to enable autocorrection.
@@ -461,6 +561,43 @@ class EditableText extends StatefulWidget {
   /// of lines.
   /// {@endtemplate}
   final int maxLines;
+
+  /// {@template flutter.widgets.editableText.minLines}
+  /// The minimum number of lines to occupy when the content spans fewer lines.
+
+  /// When [maxLines] is set as well, the height will grow between the indicated
+  /// range of lines. When [maxLines] is null, it will grow as high as needed,
+  /// starting from [minLines].
+  ///
+  /// See the examples in [maxLines] for the complete picture of how [maxLines]
+  /// and [minLines] interact to produce various behaviors.
+  ///
+  /// Defaults to null.
+  /// {@endtemplate}
+  final int minLines;
+
+  /// {@template flutter.widgets.editableText.expands}
+  /// Whether this widget's height will be sized to fill its parent.
+  ///
+  /// If set to true and wrapped in a parent widget like [Expanded] or
+  /// [SizedBox], the input will expand to fill the parent.
+  ///
+  /// [maxLines] and [minLines] must both be null when this is set to true,
+  /// otherwise an error is thrown.
+  ///
+  /// Defaults to false.
+  ///
+  /// See the examples in [maxLines] for the complete picture of how [maxLines],
+  /// [minLines], and [expands] interact to produce various behaviors.
+  ///
+  /// Input that matches the height of its parent
+  /// ```dart
+  /// Expanded(
+  ///   child: TextField(maxLines: null, expands: true),
+  /// )
+  /// ```
+  /// {@endtemplate}
+  final bool expands;
 
   /// {@template flutter.widgets.editableText.autofocus}
   /// Whether this text field should focus itself if nothing else is already
@@ -620,6 +757,24 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool enableInteractiveSelection;
 
+  /// {@template flutter.widgets.editableText.scrollController}
+  /// The [ScrollController] to use when vertically scrolling the input.
+  ///
+  /// If null, it will instantiate a new ScrollController.
+  ///
+  /// See [Scrollable.controller].
+  /// {@endtemplate}
+  final ScrollController scrollController;
+
+  /// {@template flutter.widgets.editableText.scrollPhysics}
+  /// The [ScrollPhysics] to use when vertically scrolling the input.
+  ///
+  /// If not specified, it will behave according to the current platform.
+  ///
+  /// See [Scrollable.physics].
+  /// {@endtemplate}
+  final ScrollPhysics scrollPhysics;
+
   /// Setting this property to true makes the cursor stop blinking or fading
   /// on and off once the cursor appears on focus. This property is useful for
   /// testing purposes.
@@ -673,6 +828,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   AnimationController _cursorBlinkOpacityController;
 
   final LayerLink _layerLink = LayerLink();
+  final LayerLink _startHandleLayerLink = LayerLink();
+  final LayerLink _endHandleLayerLink = LayerLink();
+
   bool _didAutoFocus = false;
   FocusAttachment _focusAttachment;
 
@@ -690,6 +848,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
   Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
+
+  @override
+  bool get cutEnabled => widget.toolbarOptions.cut && !widget.readOnly;
+
+  @override
+  bool get copyEnabled => widget.toolbarOptions.copy;
+
+  @override
+  bool get pasteEnabled => widget.toolbarOptions.paste && !widget.readOnly;
+
+  @override
+  bool get selectAllEnabled => widget.toolbarOptions.selectAll;
 
   // State lifecycle:
 
@@ -1013,7 +1183,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         context: context,
         value: _value,
         debugRequiredFor: widget,
-        layerLink: _layerLink,
+        toolbarLayerLink: _layerLink,
+        startHandleLayerLink: _startHandleLayerLink,
+        endHandleLayerLink: _endHandleLayerLink,
         renderObject: renderObject,
         selectionControls: widget.selectionControls,
         selectionDelegate: this,

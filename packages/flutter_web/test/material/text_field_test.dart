@@ -15,6 +15,7 @@ import 'package:flutter_web/services.dart';
 import 'package:flutter_web/foundation.dart';
 import 'package:flutter_web/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 
+import '../flutter_test_alternative.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -771,7 +772,7 @@ void main() {
 
     // The handle should still be fully opaque.
     expect(handle.opacity.value, equals(1.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Mouse long press is just like a tap', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -1054,7 +1055,7 @@ void main() {
 
     expect(controller.selection.baseOffset, 2);
     expect(controller.selection.extentOffset, 9);
-  });
+  }, skip: isBrowser);
 
   testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -1114,7 +1115,7 @@ void main() {
     // The selection doesn't move beyond the left handle. There's always at
     // least 1 char selected.
     expect(controller.selection.extentOffset, 5);
-  });
+  }, skip: isBrowser);
 
   testWidgets('Can use selection toolbar', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -4922,7 +4923,7 @@ void main() {
 
       // Selected text shows 3 toolbar buttons.
       expect(find.byType(FlatButton), findsNWidgets(3));
-    },
+    }, skip: isBrowser,
   );
 
   testWidgets(
@@ -5087,7 +5088,7 @@ void main() {
 
       // Collapsed toolbar shows 3 buttons.
       expect(find.byType(FlatButton), findsNWidgets(3));
-    },
+    }, skip: isBrowser,
   );
 
   testWidgets(
@@ -5967,7 +5968,7 @@ void main() {
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('iOS selection handles are rendered and not faded away', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;

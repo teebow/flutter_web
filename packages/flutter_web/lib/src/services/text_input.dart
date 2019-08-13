@@ -1,6 +1,7 @@
 // Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// Synced. * Contains Web DELTA *
 
 import 'dart:async';
 import 'package:flutter_web/io.dart' show Platform;
@@ -589,6 +590,18 @@ abstract class TextSelectionDelegate {
   /// Brings the provided [TextPosition] into the visible area of the text
   /// input.
   void bringIntoView(TextPosition position);
+
+  /// Whether cut is enabled, must not be null.
+  bool get cutEnabled => true;
+
+  /// Whether copy is enabled, must not be null.
+  bool get copyEnabled => true;
+
+  /// Whether paste is enabled, must not be null.
+  bool get pasteEnabled => true;
+
+  /// Whether select all is enabled, must not be null.
+  bool get selectAllEnabled => true;
 }
 
 /// An interface to receive information from [TextInput].

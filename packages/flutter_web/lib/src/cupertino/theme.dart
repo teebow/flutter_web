@@ -1,7 +1,7 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// Synced 2019-06-05T16:17:57.694324.
+// Synced 2019-08-12T13:26:26.250646.
 
 import 'package:flutter_web/foundation.dart';
 import 'package:flutter_web/services.dart';
@@ -260,11 +260,11 @@ class CupertinoThemeData extends Diagnosticable {
     super.debugFillProperties(properties);
     const CupertinoThemeData defaultData = CupertinoThemeData();
     properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness));
-    properties.add(DiagnosticsProperty<Color>('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
-    properties.add(DiagnosticsProperty<Color>('primaryContrastingColor', primaryContrastingColor, defaultValue: defaultData.primaryContrastingColor));
+    properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
+    properties.add(ColorProperty('primaryContrastingColor', primaryContrastingColor, defaultValue: defaultData.primaryContrastingColor));
     properties.add(DiagnosticsProperty<CupertinoTextThemeData>('textTheme', textTheme, defaultValue: defaultData.textTheme));
-    properties.add(DiagnosticsProperty<Color>('barBackgroundColor', barBackgroundColor, defaultValue: defaultData.barBackgroundColor));
-    properties.add(DiagnosticsProperty<Color>('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
+    properties.add(ColorProperty('barBackgroundColor', barBackgroundColor, defaultValue: defaultData.barBackgroundColor));
+    properties.add(ColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
   }
 }
 
