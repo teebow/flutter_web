@@ -68,6 +68,9 @@ class RecordingCanvas {
       } catch (e) {
         // commands should never fail, but...
         // https://bugzilla.mozilla.org/show_bug.cgi?id=941146
+        if (!_isNsErrorFailureException(e)) {
+          rethrow;
+        }
       }
     }
   }

@@ -146,6 +146,9 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
       } catch (e) {
         // Firefox may explode here:
         // https://bugzilla.mozilla.org/show_bug.cgi?id=941146
+        if (!_isNsErrorFailureException(e)) {
+          rethrow;
+        }
       }
       _initializeViewport();
     }
