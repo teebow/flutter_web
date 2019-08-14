@@ -141,7 +141,12 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
     if (_ctx != null) {
       _ctx.restore();
       _ctx.clearRect(0, 0, _widthInBitmapPixels, _heightInBitmapPixels);
-      _ctx.font = '';
+      try {
+        _ctx.font = '';
+      } catch (e) {
+        // Firefox may explode here:
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=941146
+      }
       _initializeViewport();
     }
     if (_canvas != null) {

@@ -61,8 +61,13 @@ class RecordingCanvas {
       debugBuf.writeln('--- End of command stream');
       print(debugBuf);
     } else {
-      for (int i = 0; i < _commands.length; i++) {
-        _commands[i].apply(engineCanvas);
+      try {
+        for (int i = 0; i < _commands.length; i++) {
+          _commands[i].apply(engineCanvas);
+        }
+      } catch (e) {
+        // commands should never fail, but...
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=941146
       }
     }
   }
