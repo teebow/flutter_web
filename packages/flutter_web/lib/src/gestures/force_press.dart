@@ -1,6 +1,7 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// Synced 2019-08-15T10:04:31.518766.
 
 import 'package:flutter_web_ui/ui.dart' show Offset;
 
@@ -51,12 +52,17 @@ class ForcePressDetails {
   /// The [globalPosition] argument must not be null.
   ForcePressDetails({
     @required this.globalPosition,
+    Offset localPosition,
     @required this.pressure,
   }) : assert(globalPosition != null),
-       assert(pressure != null);
+       assert(pressure != null),
+       localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the function was called.
   final Offset globalPosition;
+
+  /// The local position at which the function was called.
+  final Offset localPosition;
 
   /// The pressure of the pointer on the screen.
   final double pressure;
@@ -203,7 +209,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// ```
   final GestureForceInterpolation interpolation;
 
-  Offset _lastPosition;
+  OffsetPair _lastPosition;
   double _lastPressure;
   _ForceState _state = _ForceState.ready;
 
@@ -215,10 +221,10 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     if (!(event is PointerUpEvent) && event.pressureMax <= 1.0) {
       resolve(GestureDisposition.rejected);
     } else {
-      startTrackingPointer(event.pointer);
+      startTrackingPointer(event.pointer, event.transform);
       if (_state == _ForceState.ready) {
         _state = _ForceState.possible;
-        _lastPosition = event.position;
+        _lastPosition = OffsetPair.fromEventPosition(event);
       }
     }
   }
@@ -242,7 +248,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
         pressure.isNaN // and interpolation may return NaN for values it doesn't want to support...
       );
 
-      _lastPosition = event.position;
+      _lastPosition = OffsetPair.fromEventPosition(event);
       _lastPressure = pressure;
 
       if (_state == _ForceState.possible) {
@@ -260,7 +266,8 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
         if (onStart != null) {
           invokeCallback<void>('onStart', () => onStart(ForcePressDetails(
             pressure: pressure,
-            globalPosition: _lastPosition,
+            globalPosition: _lastPosition.global,
+            localPosition: _lastPosition.local,
           )));
         }
       }
@@ -271,6 +278,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
           invokeCallback<void>('onPeak', () => onPeak(ForcePressDetails(
             pressure: pressure,
             globalPosition: event.position,
+            localPosition: event.localPosition,
           )));
         }
       }
@@ -280,6 +288,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
           invokeCallback<void>('onUpdate', () => onUpdate(ForcePressDetails(
             pressure: pressure,
             globalPosition: event.position,
+            localPosition: event.localPosition,
           )));
         }
       }
@@ -295,7 +304,8 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     if (onStart != null && _state == _ForceState.started) {
       invokeCallback<void>('onStart', () => onStart(ForcePressDetails(
         pressure: _lastPressure,
-        globalPosition: _lastPosition,
+        globalPosition: _lastPosition.global,
+        localPosition: _lastPosition.local,
       )));
     }
   }
@@ -311,7 +321,8 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
       if (onEnd != null) {
         invokeCallback<void>('onEnd', () => onEnd(ForcePressDetails(
           pressure: 0.0,
-          globalPosition: _lastPosition,
+          globalPosition: _lastPosition.global,
+          localPosition: _lastPosition.local,
         )));
       }
     }

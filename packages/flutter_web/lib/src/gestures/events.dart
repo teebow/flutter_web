@@ -1,7 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// Synced. * Contains Web DELTA *
+// Synced 2019-08-15T10:04:31.515115.
 
 import 'package:flutter_web_ui/ui.dart' show Offset, PointerDeviceKind;
 
@@ -118,7 +118,8 @@ const int kTouchContact = kPrimaryButton;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the nth mouse button.
 ///
-/// The `number` argument can be at most 62.
+/// The `number` argument can be at most 62 in Flutter for mobile and desktop,
+/// and at most 32 on Flutter for web.
 ///
 /// See [kPrimaryMouseButton], [kSecondaryMouseButton], [kMiddleMouseButton],
 /// [kBackMouseButton], and [kForwardMouseButton] for semantic names for some
@@ -127,7 +128,8 @@ int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUn
 
 /// The bit of [PointerEvent.buttons] that corresponds to the nth stylus button.
 ///
-/// The `number` argument can be at most 62.
+/// The `number` argument can be at most 62 in Flutter for mobile and desktop,
+/// and at most 32 on Flutter for web.
 ///
 /// See [kPrimaryStylusButton] and [kSecondaryStylusButton] for semantic names
 /// for some stylus buttons.

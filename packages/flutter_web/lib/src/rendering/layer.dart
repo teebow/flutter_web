@@ -9,6 +9,7 @@ import 'package:flutter_web_ui/ui.dart' as ui show EngineLayer, Image, ImageFilt
                             Picture, PictureRecorder, Scene, SceneBuilder;
 
 import 'package:flutter_web/foundation.dart';
+import 'package:flutter_web/gestures.dart';
 import 'package:flutter_web/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -1318,6 +1319,9 @@ class TransformLayer extends OffsetLayer {
   Offset _transformOffset(Offset regionOffset) {
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(transform);
+      _invertedTransform = Matrix4.tryInvert(
+        PointerEvent.removePerspectiveTransform(transform)
+      );
       _inverseDirty = false;
     }
     if (_invertedTransform == null)

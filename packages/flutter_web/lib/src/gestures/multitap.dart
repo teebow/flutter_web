@@ -1,12 +1,15 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// Synced 2019-05-30T14:20:56.210485.
+// Synced 2019-08-15T10:04:31.522519.
 
 import 'dart:async';
 
 import 'package:flutter_web/foundation.dart' show required;
 import 'package:flutter_web_ui/ui.dart' show Offset;
+
+import 'package:vector_math/vector_math_64.dart';
+
 import 'arena.dart';
 import 'binding.dart';
 import 'constants.dart';
@@ -67,22 +70,22 @@ class _TapTracker {
        assert(event != null),
        assert(event.buttons != null),
        pointer = event.pointer,
-       _initialPosition = event.position,
+       _initialGlobalPosition = event.position,
        initialButtons = event.buttons,
        _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime);
 
   final int pointer;
   final GestureArenaEntry entry;
-  final Offset _initialPosition;
+  final Offset _initialGlobalPosition;
   final int initialButtons;
   final _CountdownZoned _doubleTapMinTimeCountdown;
 
   bool _isTrackingPointer = false;
 
-  void startTrackingPointer(PointerRoute route) {
+  void startTrackingPointer(PointerRoute route, Matrix4 transform) {
     if (!_isTrackingPointer) {
       _isTrackingPointer = true;
-      GestureBinding.instance.pointerRouter.addRoute(pointer, route);
+      GestureBinding.instance.pointerRouter.addRoute(pointer, route, transform);
     }
   }
 
@@ -93,8 +96,8 @@ class _TapTracker {
     }
   }
 
-  bool isWithinTolerance(PointerEvent event, double tolerance) {
-    final Offset offset = event.position - _initialPosition;
+  bool isWithinGlobalTolerance(PointerEvent event, double tolerance) {
+    final Offset offset = event.position - _initialGlobalPosition;
     return offset.distance <= tolerance;
   }
 
@@ -175,7 +178,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   @override
   void addAllowedPointer(PointerEvent event) {
     if (_firstTap != null) {
-      if (!_firstTap.isWithinTolerance(event, kDoubleTapSlop)) {
+      if (!_firstTap.isWithinGlobalTolerance(event, kDoubleTapSlop)) {
         // Ignore out-of-bounds second taps.
         return;
       } else if (!_firstTap.hasElapsedMinTime() || !_firstTap.hasSameButton(event)) {
@@ -196,7 +199,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
       doubleTapMinTime: kDoubleTapMinTime,
     );
     _trackers[event.pointer] = tracker;
-    tracker.startTrackingPointer(_handleEvent);
+    tracker.startTrackingPointer(_handleEvent, event.transform);
   }
 
   void _handleEvent(PointerEvent event) {
@@ -208,7 +211,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
       else
         _registerSecondTap(tracker);
     } else if (event is PointerMoveEvent) {
-      if (!tracker.isWithinTolerance(event, kDoubleTapTouchSlop))
+      if (!tracker.isWithinGlobalTolerance(event, kDoubleTapTouchSlop))
         _reject(tracker);
     } else if (event is PointerCancelEvent) {
       _reject(tracker);
@@ -321,13 +324,13 @@ class _TapGesture extends _TapTracker {
     this.gestureRecognizer,
     PointerEvent event,
     Duration longTapDelay,
-  }) : _lastPosition = event.position,
+  }) : _lastPosition = OffsetPair.fromEventPosition(event),
        super(
     event: event,
     entry: GestureBinding.instance.gestureArena.add(event.pointer, gestureRecognizer),
     doubleTapMinTime: kDoubleTapMinTime,
   ) {
-    startTrackingPointer(handleEvent);
+    startTrackingPointer(handleEvent, event.transform);
     if (longTapDelay > Duration.zero) {
       _timer = Timer(longTapDelay, () {
         _timer = null;
@@ -341,21 +344,21 @@ class _TapGesture extends _TapTracker {
   bool _wonArena = false;
   Timer _timer;
 
-  Offset _lastPosition;
-  Offset _finalPosition;
+  OffsetPair _lastPosition;
+  OffsetPair _finalPosition;
 
   void handleEvent(PointerEvent event) {
     assert(event.pointer == pointer);
     if (event is PointerMoveEvent) {
-      if (!isWithinTolerance(event, kTouchSlop))
+      if (!isWithinGlobalTolerance(event, kTouchSlop))
         cancel();
       else
-        _lastPosition = event.position;
+        _lastPosition = OffsetPair.fromEventPosition(event);
     } else if (event is PointerCancelEvent) {
       cancel();
     } else if (event is PointerUpEvent) {
       stopTrackingPointer(handleEvent);
-      _finalPosition = event.position;
+      _finalPosition = OffsetPair.fromEventPosition(event);
       _check();
     }
   }
@@ -448,6 +451,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       invokeCallback<void>('onTapDown', () {
         onTapDown(event.pointer, TapDownDetails(
           globalPosition: event.position,
+          localPosition: event.localPosition,
           kind: event.kind,
         ));
       });
@@ -473,23 +477,29 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       invokeCallback<void>('onTapCancel', () => onTapCancel(pointer));
   }
 
-  void _dispatchTap(int pointer, Offset globalPosition) {
+  void _dispatchTap(int pointer, OffsetPair position) {
     assert(_gestureMap.containsKey(pointer));
     _gestureMap.remove(pointer);
     if (onTapUp != null)
-      invokeCallback<void>('onTapUp', () => onTapUp(pointer, TapUpDetails(globalPosition: globalPosition)));
+      invokeCallback<void>('onTapUp', () {
+        onTapUp(pointer, TapUpDetails(
+          localPosition: position.local,
+          globalPosition: position.global,
+        ));
+      });
     if (onTap != null)
       invokeCallback<void>('onTap', () => onTap(pointer));
   }
 
-  void _dispatchLongTap(int pointer, Offset lastPosition) {
+  void _dispatchLongTap(int pointer, OffsetPair lastPosition) {
     assert(_gestureMap.containsKey(pointer));
     if (onLongTapDown != null)
       invokeCallback<void>('onLongTapDown', () {
         onLongTapDown(
           pointer,
           TapDownDetails(
-            globalPosition: lastPosition,
+            globalPosition: lastPosition.global,
+            localPosition: lastPosition.local,
             kind: getKindForPointer(pointer),
           ),
         );

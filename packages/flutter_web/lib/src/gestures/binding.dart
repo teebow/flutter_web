@@ -1,7 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// Synced 2019-05-30T14:20:56.180455.
+// Synced 2019-08-15T10:04:31.507614.
 
 import 'dart:async';
 import 'dart:collection';
@@ -196,7 +196,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     }
     for (HitTestEntry entry in hitTestResult.path) {
       try {
-        entry.target.handleEvent(event, entry);
+        entry.target.handleEvent(event.transformed(entry.transform), entry);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetailsForPointerEventDispatcher(
           exception: exception,

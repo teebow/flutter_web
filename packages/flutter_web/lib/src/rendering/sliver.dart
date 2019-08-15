@@ -1,7 +1,7 @@
 // Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// Synced 2019-05-30T14:20:56.559608.
+// Synced 2019-08-15T10:04:31.598221.
 
 import 'dart:math' as math;
 
@@ -422,14 +422,12 @@ class SliverConstraints extends Constraints {
       void verify(bool check, String message) {
         if (check)
           return;
-        final List<DiagnosticsNode> information = <DiagnosticsNode>[];
-        information.add(ErrorSummary('$runtimeType is not valid: $message'));
-
-        if (informationCollector != null) {
-          information.addAll(informationCollector());
-        }
-        information.add(DiagnosticsProperty<SliverConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.errorProperty));
-        throw FlutterError.fromParts(information);
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('$runtimeType is not valid: $message'),
+          if (informationCollector != null)
+            ...informationCollector(),
+          DiagnosticsProperty<SliverConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.errorProperty)
+        ]);
       }
       verify(axis != null, 'The "axis" is null.');
       verify(growthDirection != null, 'The "growthDirection" is null.');
@@ -701,15 +699,12 @@ class SliverGeometry extends Diagnosticable {
       void verify(bool check, String summary, {List<DiagnosticsNode> details}) {
         if (check)
           return;
-        final List<DiagnosticsNode> information = <DiagnosticsNode>[];
-        information.add(ErrorSummary('$runtimeType is not valid: $summary'));
-        if (details != null) {
-          information.addAll(details);
-        }
-        if (informationCollector != null) {
-          information.addAll(informationCollector());
-        }
-        throw FlutterError.fromParts(information);
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('$runtimeType is not valid: $summary'),
+          ...?details,
+          if (informationCollector != null)
+            ...informationCollector(),
+        ]);
       }
 
       verify(scrollExtent != null, 'The "scrollExtent" is null.');
@@ -847,12 +842,18 @@ class SliverHitTestResult extends HitTestResult {
     assert(mainAxisPosition != null);
     assert(crossAxisPosition != null);
     assert(hitTest != null);
-    // TODO(goderbauer): use paintOffset when transforming pointer events is implemented.
-    return hitTest(
+    if (paintOffset != null) {
+      pushTransform(Matrix4.translationValues(paintOffset.dx, paintOffset.dy, 0));
+    }
+    final bool isHit = hitTest(
       this,
       mainAxisPosition: mainAxisPosition - mainAxisOffset,
       crossAxisPosition: crossAxisPosition - crossAxisOffset,
     );
+    if (paintOffset != null) {
+      popTransform();
+    }
+    return isHit;
   }
 }
 
@@ -864,7 +865,7 @@ class SliverHitTestEntry extends HitTestEntry {
   /// Creates a sliver hit test entry.
   ///
   /// The [mainAxisPosition] and [crossAxisPosition] arguments must not be null.
-  const SliverHitTestEntry(
+  SliverHitTestEntry(
     RenderSliver target, {
     @required this.mainAxisPosition,
     @required this.crossAxisPosition,
@@ -1199,15 +1200,16 @@ abstract class RenderSliver extends RenderObject {
       if (geometry.paintExtent > constraints.remainingPaintExtent) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('SliverGeometry has a paintOffset that exceeds the remainingPaintExtent from the constraints.'),
-          describeForError('The render object whose geometry violates the constraints is the following')
-        ]..addAll(_debugCompareFloats(
+          describeForError('The render object whose geometry violates the constraints is the following'),
+          ..._debugCompareFloats(
             'remainingPaintExtent', constraints.remainingPaintExtent,
             'paintExtent', geometry.paintExtent,
-        ))
-        ..add(ErrorDescription(
-          'The paintExtent must cause the child sliver to paint within the viewport, and so '
-          'cannot exceed the remainingPaintExtent.',
-        )));
+          ),
+          ErrorDescription(
+            'The paintExtent must cause the child sliver to paint within the viewport, and so '
+            'cannot exceed the remainingPaintExtent.',
+          ),
+        ]);
       }
       return true;
     }());

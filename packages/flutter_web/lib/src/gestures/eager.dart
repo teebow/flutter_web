@@ -1,7 +1,7 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// Synced 2019-06-03T11:09:26.955527.
+// Synced 2019-08-15T10:04:31.512154.
 
 import 'arena.dart';
 import 'events.dart';
@@ -21,7 +21,7 @@ class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
     // We call startTrackingPointer as this is where OneSequenceGestureRecognizer joins the arena.
-    startTrackingPointer(event.pointer);
+    startTrackingPointer(event.pointer, event.transform);
     resolve(GestureDisposition.accepted);
     stopTrackingPointer(event.pointer);
   }
