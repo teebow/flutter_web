@@ -1454,13 +1454,8 @@ class _PaintBounds {
     double transformedPointBottom = bottom;
 
     if (!_currentMatrixIsIdentity) {
-      final ui.Rect transformedRect = localClipToGlobalClip(
-        localLeft: left,
-        localTop: top,
-        localRight: right,
-        localBottom: bottom,
-        transform: _currentMatrix,
-      );
+      final ui.Rect transformedRect =
+          transformLTRB(_currentMatrix, left, top, right, bottom);
       transformedPointLeft = transformedRect.left;
       transformedPointTop = transformedRect.top;
       transformedPointRight = transformedRect.right;
