@@ -8,13 +8,14 @@ import 'package:flutter_web/io.dart' show Platform;
 import 'package:flutter_web_ui/ui.dart' show TextAffinity, hashValues, Offset;
 
 import 'package:flutter_web/foundation.dart';
+import 'package:flutter_web/painting.dart';
 
 import 'message_codec.dart';
 import 'system_channels.dart';
 import 'system_chrome.dart';
 import 'text_editing.dart';
 
-export 'package:flutter_web_ui/ui.dart' show TextAffinity;
+export 'package:flutter_web_ui/ui.dart' show Rect, TextAffinity;
 
 /// The type of information for which to optimize the text input control.
 ///
@@ -654,6 +655,57 @@ class TextInputConnection {
     SystemChannels.textInput.invokeMethod(
       'TextInput.setEditingState',
       value.toJSON(),
+    );
+  }
+
+  /// Send the top-left and bottom-right coordinates of editable text to engine.
+  ///
+  /// These offsets are absolute, meaning they are calculated converting the
+  /// local coordinates to global coordinates.
+  ///
+  /// These offsets will be used to calculate the location and size of the
+  /// editable text.
+  ///
+  /// The values are taken from the paint boundaries of the render box.
+  ///
+  /// 1. topLeft refers to coordinates of top, left edge of render box converted
+  /// to global coordinates.
+  ///
+  /// 2. bottomRight refers to coordinates of bottom, right edge of render box
+  /// converted to global coordinates.
+  void setEditingLocationSize(Offset topLeft, Offset bottomRight) {
+    double height = bottomRight.dy - topLeft.dy;
+    double width = bottomRight.dx - topLeft.dx;
+
+    SystemChannels.textInput.invokeMethod(
+      'TextInput.setEditingLocationSize',
+      <String, dynamic>{
+        'top': topLeft.dy,
+        'left': topLeft.dx,
+        'width': width,
+        'height': height,
+      },
+    );
+  }
+
+  /// Send text styling information.
+  ///
+  /// This information is used by the Flutter Web Engine to change the style
+  /// of the hidden native input's content. Hence, the content size will match
+  /// to the size of the editable widget's content.
+  void setStyle(
+      TextStyle textStyle, TextDirection textDirection, TextAlign textAlign) {
+    assert(attached);
+
+    SystemChannels.textInput.invokeMethod(
+      'TextInput.setStyle',
+      <String, dynamic>{
+        'fontFamily': textStyle.fontFamily,
+        'fontSize': textStyle.fontSize,
+        'fontWeightValue': textStyle.fontWeight?.index,
+        'textAlign': textAlign.toString(),
+        if (textDirection != null) 'textDirection': textDirection,
+      },
     );
   }
 

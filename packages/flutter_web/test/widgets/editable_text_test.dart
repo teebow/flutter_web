@@ -15,7 +15,7 @@ import 'package:flutter_web/foundation.dart';
 
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
-import '../flutter_test_alternative.dart';
+import '../flutter_test_alternative.dart' hide isInstanceOf;
 
 final TextEditingController controller = TextEditingController();
 final FocusNode focusNode = FocusNode();
@@ -464,6 +464,13 @@ void main() {
             equals('TextInputAction.done'));
       });
 
+  /// Toolbar is not used in Flutter Web. Skip this check.
+  ///
+  /// Web is using native dom elements (it is also used as platform input)
+  /// to enable clipboard functionality of the toolbar: copy, paste, select,
+  /// cut. It might also provide additional functionality depending on the
+  /// browser (such as ranslation). Due to this, in browsers, we should not
+  /// show a Flutter toolbar for the editable text elements.
   testWidgets('can only show toolbar when there is text and a selection',
           (WidgetTester tester) async {
         await tester.pumpWidget(
@@ -501,9 +508,10 @@ void main() {
         expect(state.showToolbar(), true);
         await tester.pump();
         expect(find.text('PASTE'), findsOneWidget);
-      });
+      }, skip: isBrowser);
 
-  testWidgets('Fires onChanged when text changes via TextSelectionOverlay',
+  /// Flutter Clipboard is not active in Flutter Web. Skip the test in browsers.
+  testWidgets('Fires onChanged when text changes via Clipboard',
           (WidgetTester tester) async {
         final GlobalKey<EditableTextState> editableTextKey =
         GlobalKey<EditableTextState>();
@@ -545,7 +553,7 @@ void main() {
         await tester.pump();
 
         expect(changedValue, clipboardContent);
-      });
+      }, skip: isBrowser);
 
   testWidgets('Does not lose focus by default when "next" action is pressed',
           (WidgetTester tester) async {
@@ -845,7 +853,8 @@ void main() {
         await tester.pumpWidget(builder());
         await tester.showKeyboard(find.byType(EditableText));
 
-        // Verify TextInput.setEditingState is fired with updated text when controller is replaced.
+        // Verify TextInput.setEditingState and TextInput.setEditingLocationSize
+        // are both fired with updated text when controller is replaced.
         final List<MethodCall> log = <MethodCall>[];
         SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
           log.add(methodCall);
@@ -855,9 +864,9 @@ void main() {
         });
         await tester.pump();
 
-        expect(log, hasLength(1));
+        expect(log, hasLength(2));
         expect(
-          log.single,
+          log.first,
           isMethodCall(
             'TextInput.setEditingState',
             arguments: const <String, dynamic>{
@@ -868,6 +877,18 @@ void main() {
               'selectionIsDirectional': false,
               'composingBase': -1,
               'composingExtent': -1,
+            },
+          ),
+        );
+        expect(
+          log.last,
+          isMethodCall(
+            'TextInput.setEditingLocationSize',
+            arguments: const <String, dynamic>{
+              'top': 293,
+              'left': 0,
+              'width': 800,
+              'height': 14,
             },
           ),
         );
@@ -1916,6 +1937,150 @@ void main() {
     final MethodCall setClient = log.first;
     expect(setClient.method, 'TextInput.setClient');
     expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.light');
+  });
+
+  testWidgets('location of widget is sent on show keyboard', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+            devicePixelRatio: 1.0
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            focusNode: FocusNode(),
+            style: Typography(platform: TargetPlatform.android).black.subhead,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    final MethodCall setLocationAndSizeOfInput = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditingLocationSize');
+    Map<String, dynamic> arguments = setLocationAndSizeOfInput.arguments;
+    expect(setLocationAndSizeOfInput, isNotNull);
+    expect(arguments.remove('top'), isInstanceOf<double>());
+    expect(arguments.remove('left'), isInstanceOf<double>());
+    expect(arguments.remove('height'), isInstanceOf<double>());
+    expect(arguments.remove('width'), isInstanceOf<double>());
+  });
+
+  testWidgets('text styling info is sent on show keyboard', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+            devicePixelRatio: 1.0
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            focusNode: FocusNode(),
+            style: new TextStyle(
+              fontSize: 20.0,
+              fontFamily: 'Roboto',
+              fontWeight: FontWeight.w600,
+            ),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    final MethodCall setStyle = log.firstWhere((MethodCall m) => m.method == 'TextInput.setStyle');
+    Map<String, dynamic> arguments = setStyle.arguments;
+    expect(setStyle, isNotNull);
+    expect(arguments.remove('fontSize'), isInstanceOf<double>());
+    expect(arguments.remove('fontFamily'), isInstanceOf<String>());
+    expect(arguments.remove('fontWeightValue'), isInstanceOf<int>());
+    expect(arguments.remove('textAlign'), isInstanceOf<String>());
+  });
+
+  testWidgets('text styling info is sent on style update', (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey =
+    GlobalKey<EditableTextState>();
+    StateSetter setState;
+    final TextStyle textStyle1 =
+      new TextStyle(
+        fontSize: 20.0,
+        fontFamily: 'RobotoMono',
+        fontWeight: FontWeight.w600,
+      );
+    final TextStyle textStyle2 =
+      new TextStyle(
+        fontSize: 20.0,
+        fontFamily: 'Raleway',
+        fontWeight: FontWeight.w700,
+      );
+    TextStyle currentTextStyle = textStyle1;
+
+    Widget builder() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          setState = setter;
+          return MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: EditableText(
+                    backgroundCursorColor: Colors.grey,
+                    key: editableTextKey,
+                    controller: controller,
+                    focusNode: FocusNode(),
+                    style: currentTextStyle,
+                    cursorColor: Colors.blue,
+                    selectionControls: materialTextSelectionControls,
+                    keyboardType: TextInputType.text,
+                    onChanged: (String value) {},
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    await tester.showKeyboard(find.byType(EditableText));
+
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+    setState(() {
+      currentTextStyle = textStyle2;
+    });
+    await tester.pump();
+
+    // Updated styling information should be sent via TextInput.setStyle method.
+    final MethodCall setStyle =
+        log.firstWhere((MethodCall m) => m.method == 'TextInput.setStyle');
+    Map<String, dynamic> arguments = setStyle.arguments;
+    expect(setStyle, isNotNull);
+    expect(arguments.remove('fontSize'), isInstanceOf<double>());
+    expect(arguments.remove('fontFamily'), isInstanceOf<String>());
+    expect(arguments.remove('fontWeightValue'), isInstanceOf<int>());
+    expect(arguments.remove('textAlign'), isInstanceOf<String>());
   });
 
   testWidgets('custom keyboardAppearance is respected', (WidgetTester tester) async {

@@ -4,7 +4,7 @@
 // Synced. * Contains Web DELTA *
 
 import 'dart:async';
-import 'package:flutter_web_ui/ui.dart' as ui;
+import 'package:flutter_web_ui/ui.dart' as ui hide TextStyle;
 
 import 'package:flutter_web/foundation.dart';
 import 'package:flutter_web/painting.dart';
@@ -900,6 +900,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       widget.focusNode.addListener(_handleFocusChanged);
       updateKeepAlive();
     }
+    if (widget.style != oldWidget.style) {
+      _textInputConnection?.setStyle(widget.style, widget.textDirection, widget.textAlign);
+    }
   }
 
   @override
@@ -1105,18 +1108,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final TextEditingValue localValue = _value;
       _lastKnownRemoteTextEditingValue = localValue;
       _textInputConnection = TextInput.attach(this,
-          TextInputConfiguration(
-              inputType: widget.keyboardType,
-              obscureText: widget.obscureText,
-              autocorrect: widget.autocorrect,
-              inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
+        TextInputConfiguration(
+          inputType: widget.keyboardType,
+          obscureText: widget.obscureText,
+          autocorrect: widget.autocorrect,
+          inputAction: widget.textInputAction ??
+              (widget.keyboardType == TextInputType.multiline
                   ? TextInputAction.newline
                   : TextInputAction.done
               ),
-              textCapitalization: widget.textCapitalization,
-              keyboardAppearance: widget.keyboardAppearance,
-          ),
-      )..setEditingState(localValue);
+          textCapitalization: widget.textCapitalization,
+          keyboardAppearance: widget.keyboardAppearance,
+        ),
+      )..setEditingLocationSize(
+           renderEditable.localToGlobal(Offset.zero ),
+           renderEditable.localToGlobal(renderEditable.size.bottomRight(Offset.zero)))
+       ..setStyle(widget.style, widget.textDirection, widget.textAlign)
+       ..setEditingState(localValue);
     }
     _textInputConnection.show();
   }
@@ -1391,6 +1399,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     updateKeepAlive();
   }
 
+  void _updateTextLocation() {
+    _textInputConnection?.setEditingLocationSize(
+        renderEditable.localToGlobal(Offset.zero),
+        renderEditable.localToGlobal(renderEditable.size.bottomRight(Offset.zero)));
+  }
+
   TextDirection get _textDirection {
     final TextDirection result = widget.textDirection ?? Directionality.of(context);
     assert(result != null, '$runtimeType created without a textDirection and with no ambient Directionality.');
@@ -1424,6 +1438,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Returns `false` if a toolbar couldn't be shown such as when no text
   /// selection currently exists.
   bool showToolbar() {
+    // TODO(flutter_web): Web is using native dom elements to enable clipboard
+    // functionality of the toolbar: copy, paste, select, cut. It might also
+    // provide additional functionality depending on the browser (such as
+    // translate). Due to this we should not show a Flutter toolbar for the
+    // editable text elements.
+    if(ui.isWeb) {
+      return false;
+    }
     if (_selectionOverlay == null)
       return false;
 
@@ -1504,6 +1526,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               enableInteractiveSelection: widget.enableInteractiveSelection,
               textSelectionDelegate: this,
               devicePixelRatio: _devicePixelRatio,
+              platformInputPaintCallback: _updateTextLocation,
             ),
           ),
         );
@@ -1574,6 +1597,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.textSelectionDelegate,
     this.paintCursorAboveText,
     this.devicePixelRatio,
+    this.platformInputPaintCallback,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);
@@ -1604,6 +1628,7 @@ class _Editable extends LeafRenderObjectWidget {
   final TextSelectionDelegate textSelectionDelegate;
   final double devicePixelRatio;
   final bool paintCursorAboveText;
+  final PlatformInputPaintCallback platformInputPaintCallback;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -1633,7 +1658,7 @@ class _Editable extends LeafRenderObjectWidget {
       enableInteractiveSelection: enableInteractiveSelection,
       textSelectionDelegate: textSelectionDelegate,
       devicePixelRatio: devicePixelRatio,
-    );
+    )..platformInputPaintCallback = platformInputPaintCallback;
   }
 
   @override
@@ -1661,6 +1686,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..cursorOffset = cursorOffset
       ..textSelectionDelegate = textSelectionDelegate
       ..devicePixelRatio = devicePixelRatio
-      ..paintCursorAboveText = paintCursorAboveText;
+      ..paintCursorAboveText = paintCursorAboveText
+      ..platformInputPaintCallback = platformInputPaintCallback;
   }
 }

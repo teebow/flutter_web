@@ -31,6 +31,9 @@ const double _kFloatingCaretRadius = 1.0;
 /// Used by [RenderEditable.onSelectionChanged].
 typedef SelectionChangedHandler = void Function(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause);
 
+/// Used by [RenderEditable.platformInputPaintCallback]
+typedef PlatformInputPaintCallback = void Function();
+
 /// Indicates what triggered the change in selected text (including changes to
 /// the cursor location).
 enum SelectionChangedCause {
@@ -223,6 +226,13 @@ class RenderEditable extends RenderBox {
 
   /// Character used to obscure text if [obscureText] is true.
   static const String obscuringCharacter = '•';
+
+  /// Called on the start of paint operation.
+  ///
+  /// This method is called in the beginning of the paint operation. It informs
+  /// the caller that the paint has started. To be used for platform inputs.
+  /// For example, web engine used native input elements for text inputs.
+  PlatformInputPaintCallback platformInputPaintCallback;
 
   /// Called when the selection changes.
   SelectionChangedHandler onSelectionChanged;
@@ -1761,6 +1771,9 @@ class RenderEditable extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    if (platformInputPaintCallback != null) {
+      platformInputPaintCallback();
+    }
     _layoutText(constraints.maxWidth);
     if (_hasVisualOverflow)
       context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents);
