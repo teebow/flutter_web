@@ -2010,7 +2010,7 @@ void main() {
     expect(arguments.remove('fontSize'), isInstanceOf<double>());
     expect(arguments.remove('fontFamily'), isInstanceOf<String>());
     expect(arguments.remove('fontWeightValue'), isInstanceOf<int>());
-    expect(arguments.remove('textAlign'), isInstanceOf<String>());
+    expect(arguments.remove('textAlignIndex'), isInstanceOf<int>());
   });
 
   testWidgets('text styling info is sent on style update', (WidgetTester tester) async {
@@ -2080,7 +2080,7 @@ void main() {
     expect(arguments.remove('fontSize'), isInstanceOf<double>());
     expect(arguments.remove('fontFamily'), isInstanceOf<String>());
     expect(arguments.remove('fontWeightValue'), isInstanceOf<int>());
-    expect(arguments.remove('textAlign'), isInstanceOf<String>());
+    expect(arguments.remove('textAlignIndex'), isInstanceOf<int>());
   });
 
   testWidgets('custom keyboardAppearance is respected', (WidgetTester tester) async {

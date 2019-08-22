@@ -1120,11 +1120,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           textCapitalization: widget.textCapitalization,
           keyboardAppearance: widget.keyboardAppearance,
         ),
-      )..setEditingLocationSize(
-           renderEditable.localToGlobal(Offset.zero ),
-           renderEditable.localToGlobal(renderEditable.size.bottomRight(Offset.zero)))
-       ..setStyle(widget.style, widget.textDirection, widget.textAlign)
-       ..setEditingState(localValue);
+      );
+      _updateTextLocation();
+      _textInputConnection
+        ..setStyle(widget.style, widget.textDirection, widget.textAlign)
+        ..setEditingState(localValue);
     }
     _textInputConnection.show();
   }
@@ -1400,9 +1400,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _updateTextLocation() {
+    // If the ancestor is null this function applies the paint transform up to
+    // the root.
     _textInputConnection?.setEditingLocationSize(
-        renderEditable.localToGlobal(Offset.zero),
-        renderEditable.localToGlobal(renderEditable.size.bottomRight(Offset.zero)));
+        renderEditable.size,
+        renderEditable.getTransformTo(null /* ancestor */));
   }
 
   TextDirection get _textDirection {

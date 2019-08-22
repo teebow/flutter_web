@@ -9,6 +9,7 @@ import 'package:flutter_web_ui/ui.dart' show TextAffinity, hashValues, Offset;
 
 import 'package:flutter_web/foundation.dart';
 import 'package:flutter_web/painting.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'message_codec.dart';
 import 'system_channels.dart';
@@ -658,22 +659,28 @@ class TextInputConnection {
     );
   }
 
-  /// Send the top-left and bottom-right coordinates of editable text to engine.
+  /// Send the size of the editable text to engine.
   ///
-  /// These offsets are absolute, meaning they are calculated converting the
-  /// local coordinates to global coordinates.
+  /// These are calculated using matrix for transform to global coordinates and
+  /// size of the render box. Therefore values being send (top-left,
+  /// bottom-right) are absolute. Meaning they are calculated converting the
+  /// local coordinates to global coordinates. These numbers are in logical
+  /// pixels. [RenderObject.applyPaintTransform] should be used to get the
+  /// physical coordinates.
   ///
-  /// These offsets will be used to calculate the location and size of the
-  /// editable text.
+  /// The values are taken from the size of the render box.
   ///
-  /// The values are taken from the paint boundaries of the render box.
+  /// 1. renderBoxSize: size of the render box.
   ///
-  /// 1. topLeft refers to coordinates of top, left edge of render box converted
-  /// to global coordinates.
-  ///
-  /// 2. bottomRight refers to coordinates of bottom, right edge of render box
-  /// converted to global coordinates.
-  void setEditingLocationSize(Offset topLeft, Offset bottomRight) {
+  /// 2. transformToGlobal: a matrix that maps the local paint coordinate system
+  /// to the [PipelineOwner.rootNode]
+  void setEditingLocationSize(Size renderBoxSize, Matrix4 transformToGlobal) {
+    // TODO(nturgut): Send web engine transform instead of topLeft-bottomRight.
+    Offset topLeft = MatrixUtils.transformPoint(transformToGlobal, Offset.zero);
+    Offset bottomRight = MatrixUtils.transformPoint(
+        transformToGlobal, renderBoxSize.bottomRight(Offset.zero)
+    );
+
     double height = bottomRight.dy - topLeft.dy;
     double width = bottomRight.dx - topLeft.dx;
 
@@ -703,7 +710,7 @@ class TextInputConnection {
         'fontFamily': textStyle.fontFamily,
         'fontSize': textStyle.fontSize,
         'fontWeightValue': textStyle.fontWeight?.index,
-        'textAlign': textAlign.toString(),
+        'textAlignIndex': textAlign.index,
         if (textDirection != null) 'textDirection': textDirection,
       },
     );
