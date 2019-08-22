@@ -957,7 +957,7 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
       final dynamic op = _ops[i];
       if (op is EngineTextStyle) {
         final html.SpanElement span = domRenderer.createElement('span');
-        _applyTextStyleToElement(element: span, style: op);
+        _applyTextStyleToElement(element: span, style: op, isSpan: true);
         if (op._background != null) {
           _applyTextBackgroundToElement(element: span, style: op);
         }
@@ -1098,10 +1098,13 @@ void _applyParagraphStyleToElement({
 /// corresponding CSS equivalents.
 ///
 /// If [previousStyle] is not null, updates only the mismatching attributes.
+/// If [isSpan] is true, the text element is a span within richtext and
+/// should not assign effectiveFontFamily if fontFamily was not specified.
 void _applyTextStyleToElement({
   @required html.HtmlElement element,
   @required EngineTextStyle style,
   EngineTextStyle previousStyle,
+  bool isSpan = false,
 }) {
   assert(element != null);
   assert(style != null);
@@ -1122,8 +1125,16 @@ void _applyTextStyleToElement({
       cssStyle.fontStyle =
           style._fontStyle == ui.FontStyle.normal ? 'normal' : 'italic';
     }
-    if (style._effectiveFontFamily != null) {
-      cssStyle.fontFamily = style._effectiveFontFamily;
+    // For test environment use effectiveFontFamily since we need to
+    // consistently use Ahem font.
+    if (isSpan && !ui.debugEmulateFlutterTesterEnvironment) {
+      if (style._fontFamily != null) {
+        cssStyle.fontFamily = style._fontFamily;
+      }
+    } else {
+      if (style._effectiveFontFamily != null) {
+        cssStyle.fontFamily = style._effectiveFontFamily;
+      }
     }
     if (style._letterSpacing != null) {
       cssStyle.letterSpacing = '${style._letterSpacing}px';
