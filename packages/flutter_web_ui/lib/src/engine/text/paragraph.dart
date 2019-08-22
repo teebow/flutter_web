@@ -997,8 +997,11 @@ String fontWeightToCss(ui.FontWeight fontWeight) {
   if (fontWeight == null) {
     return null;
   }
+  return fontWeightIndexToCss(fontWeightIndex: fontWeight.index);
+}
 
-  switch (fontWeight.index) {
+String fontWeightIndexToCss({int fontWeightIndex = 3}) {
+  switch (fontWeightIndex) {
     case 0:
       return '100';
     case 1:
@@ -1021,7 +1024,7 @@ String fontWeightToCss(ui.FontWeight fontWeight) {
 
   assert(() {
     throw AssertionError(
-      'Failed to convert font weight $fontWeight to CSS.',
+      'Failed to convert font weight $fontWeightIndex to CSS.',
     );
   }());
 
@@ -1043,7 +1046,7 @@ void _applyParagraphStyleToElement({
   final html.CssStyleDeclaration cssStyle = element.style;
   if (previousStyle == null) {
     if (style._textAlign != null) {
-      cssStyle.textAlign = _textAlignToCssValue(
+      cssStyle.textAlign = textAlignToCssValue(
           style._textAlign, style._textDirection ?? ui.TextDirection.ltr);
     }
     if (style._lineHeight != null) {
@@ -1067,7 +1070,7 @@ void _applyParagraphStyleToElement({
     }
   } else {
     if (style._textAlign != previousStyle._textAlign) {
-      cssStyle.textAlign = _textAlignToCssValue(
+      cssStyle.textAlign = textAlignToCssValue(
           style._textAlign, style._textDirection ?? ui.TextDirection.ltr);
     }
     if (style._lineHeight != style._lineHeight) {
@@ -1276,8 +1279,7 @@ String _textDirectionToCssValue(ui.TextDirection textDirection) {
 /// ```css
 /// text-align: right;
 /// ```
-String _textAlignToCssValue(
-    ui.TextAlign align, ui.TextDirection textDirection) {
+String textAlignToCssValue(ui.TextAlign align, ui.TextDirection textDirection) {
   switch (align) {
     case ui.TextAlign.left:
       return 'left';
