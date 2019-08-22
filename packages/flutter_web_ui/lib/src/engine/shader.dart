@@ -47,7 +47,7 @@ class GradientSweep extends EngineGradient {
   }
 
   @override
-  Object createPaintStyle(_) {
+  Object createPaintStyle(html.CanvasRenderingContext2D ctx) {
     throw UnimplementedError();
   }
 
@@ -136,7 +136,7 @@ class GradientLinear extends EngineGradient {
   js.JsObject createSkiaShader() {
     assert(experimentalUseSkia);
 
-    js.JsArray<num> jsColors = js.JsArray<num>();
+    final js.JsArray<num> jsColors = js.JsArray<num>();
     jsColors.length = colors.length;
     for (int i = 0; i < colors.length; i++) {
       jsColors[i] = colors[i].value;
@@ -175,7 +175,7 @@ class GradientRadial extends EngineGradient {
   final Float64List matrix4;
 
   @override
-  Object createPaintStyle(_) {
+  Object createPaintStyle(html.CanvasRenderingContext2D ctx) {
     throw UnimplementedError();
   }
 
@@ -200,7 +200,7 @@ class GradientConical extends EngineGradient {
   final Float64List matrix4;
 
   @override
-  Object createPaintStyle(_) {
+  Object createPaintStyle(html.CanvasRenderingContext2D ctx) {
     throw UnimplementedError();
   }
 

@@ -10,7 +10,6 @@ import 'package:flutter_web_ui/ui.dart';
 import 'package:flutter_web/services.dart';
 import 'package:flutter_web_ui/ui.dart' as ui;
 import 'package:meta/meta.dart';
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementation_imports
 import 'package:test/test.dart' hide TypeMatcher;
 import 'package:test/test.dart' as test_package show TypeMatcher;

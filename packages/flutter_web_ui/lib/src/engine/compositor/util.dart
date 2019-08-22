@@ -10,7 +10,7 @@ js.JsObject makeSkRect(ui.Rect rect) {
 }
 
 js.JsArray<double> makeSkPoint(ui.Offset point) {
-  js.JsArray<double> skPoint = new js.JsArray<double>();
+  final js.JsArray<double> skPoint = js.JsArray<double>();
   skPoint.length = 2;
   skPoint[0] = point.dx;
   skPoint[1] = point.dy;

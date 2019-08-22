@@ -588,7 +588,7 @@ class CanvasTextMeasurementService extends TextMeasurementService {
   ui.TextPosition getTextPositionForOffset(EngineParagraph paragraph,
       ui.ParagraphConstraints constraints, ui.Offset offset) {
     // TODO(flutter_web): implement.
-    return new ui.TextPosition(offset: 0);
+    return const ui.TextPosition(offset: 0);
   }
 }
 
