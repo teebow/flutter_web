@@ -901,7 +901,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       updateKeepAlive();
     }
     if (widget.style != oldWidget.style) {
-      _textInputConnection?.setStyle(widget.style, widget.textDirection, widget.textAlign);
+      _textInputConnection?.setStyle(widget.style, _textDirection, widget.textAlign);
     }
   }
 
@@ -1123,7 +1123,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
       _updateTextLocation();
       _textInputConnection
-        ..setStyle(widget.style, widget.textDirection, widget.textAlign)
+        ..setStyle(widget.style, _textDirection, widget.textAlign)
         ..setEditingState(localValue);
     }
     _textInputConnection.show();
@@ -1402,7 +1402,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void _updateTextLocation() {
     // If the ancestor is null this function applies the paint transform up to
     // the root.
-    _textInputConnection?.setEditingLocationSize(
+    _textInputConnection?.setEditableSizeAndTransform(
         renderEditable.size,
         renderEditable.getTransformTo(null /* ancestor */));
   }

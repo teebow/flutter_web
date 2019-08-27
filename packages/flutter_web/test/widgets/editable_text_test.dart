@@ -853,7 +853,7 @@ void main() {
         await tester.pumpWidget(builder());
         await tester.showKeyboard(find.byType(EditableText));
 
-        // Verify TextInput.setEditingState and TextInput.setEditingLocationSize
+        // Verify TextInput.setEditingState and TextInput.setEditableSizeAndTransform
         // are both fired with updated text when controller is replaced.
         final List<MethodCall> log = <MethodCall>[];
         SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
@@ -883,12 +883,11 @@ void main() {
         expect(
           log.last,
           isMethodCall(
-            'TextInput.setEditingLocationSize',
+            'TextInput.setEditableSizeAndTransform',
             arguments: const <String, dynamic>{
-              'top': 293,
-              'left': 0,
               'width': 800,
               'height': 14,
+              'transform': <double>[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 293.0, 0.0, 1.0],
             },
           ),
         );
@@ -1965,13 +1964,14 @@ void main() {
     );
 
     await tester.showKeyboard(find.byType(EditableText));
-    final MethodCall setLocationAndSizeOfInput = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditingLocationSize');
-    Map<String, dynamic> arguments = setLocationAndSizeOfInput.arguments;
-    expect(setLocationAndSizeOfInput, isNotNull);
-    expect(arguments.remove('top'), isInstanceOf<double>());
-    expect(arguments.remove('left'), isInstanceOf<double>());
-    expect(arguments.remove('height'), isInstanceOf<double>());
-    expect(arguments.remove('width'), isInstanceOf<double>());
+    final MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
+    expect(methodCall, isNotNull);
+    final Map<String, dynamic> arguments = methodCall.arguments;
+    expect(arguments, <String, dynamic>{
+      'width': 800,
+      'height': 600,
+      'transform': <double>[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+    });
   });
 
   testWidgets('text styling info is sent on show keyboard', (WidgetTester tester) async {
@@ -1986,31 +1986,32 @@ void main() {
         data: const MediaQueryData(
             devicePixelRatio: 1.0
         ),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: EditableText(
-            controller: controller,
-            focusNode: FocusNode(),
-            style: new TextStyle(
-              fontSize: 20.0,
-              fontFamily: 'Roboto',
-              fontWeight: FontWeight.w600,
-            ),
-            cursorColor: Colors.blue,
-            backgroundCursorColor: Colors.grey,
+        child: EditableText(
+          textDirection: TextDirection.rtl,
+          controller: controller,
+          focusNode: FocusNode(),
+          style: new TextStyle(
+            fontSize: 20.0,
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.w600,
           ),
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
         ),
       ),
     );
 
     await tester.showKeyboard(find.byType(EditableText));
     final MethodCall setStyle = log.firstWhere((MethodCall m) => m.method == 'TextInput.setStyle');
-    Map<String, dynamic> arguments = setStyle.arguments;
     expect(setStyle, isNotNull);
-    expect(arguments.remove('fontSize'), isInstanceOf<double>());
-    expect(arguments.remove('fontFamily'), isInstanceOf<String>());
-    expect(arguments.remove('fontWeightValue'), isInstanceOf<int>());
-    expect(arguments.remove('textAlignIndex'), isInstanceOf<int>());
+    final Map<String, dynamic> style = setStyle.arguments;
+    expect(style, <String, dynamic>{
+      'fontSize': 20.0,
+      'fontFamily': 'Roboto',
+      'fontWeightIndex': 5,
+      'textAlignIndex': 4,
+      'textDirectionIndex': 0,
+    });
   });
 
   testWidgets('text styling info is sent on style update', (WidgetTester tester) async {
@@ -2073,14 +2074,16 @@ void main() {
     await tester.pump();
 
     // Updated styling information should be sent via TextInput.setStyle method.
-    final MethodCall setStyle =
-        log.firstWhere((MethodCall m) => m.method == 'TextInput.setStyle');
-    Map<String, dynamic> arguments = setStyle.arguments;
+    final MethodCall setStyle = log.firstWhere((MethodCall m) => m.method == 'TextInput.setStyle');
     expect(setStyle, isNotNull);
-    expect(arguments.remove('fontSize'), isInstanceOf<double>());
-    expect(arguments.remove('fontFamily'), isInstanceOf<String>());
-    expect(arguments.remove('fontWeightValue'), isInstanceOf<int>());
-    expect(arguments.remove('textAlignIndex'), isInstanceOf<int>());
+    final Map<String, dynamic> style = setStyle.arguments;
+    expect(style, <String, dynamic>{
+      'fontSize': 20.0,
+      'fontFamily': 'Raleway',
+      'fontWeightIndex': 6,
+      'textAlignIndex': 4,
+      'textDirectionIndex': 1,
+    });
   });
 
   testWidgets('custom keyboardAppearance is respected', (WidgetTester tester) async {

@@ -659,38 +659,24 @@ class TextInputConnection {
     );
   }
 
-  /// Send the size of the editable text to engine.
-  ///
-  /// These are calculated using matrix for transform to global coordinates and
-  /// size of the render box. Therefore values being send (top-left,
-  /// bottom-right) are absolute. Meaning they are calculated converting the
-  /// local coordinates to global coordinates. These numbers are in logical
-  /// pixels. [RenderObject.applyPaintTransform] should be used to get the
-  /// physical coordinates.
+  /// Send the size and transform of the editable text to engine.
   ///
   /// The values are taken from the size of the render box.
   ///
-  /// 1. renderBoxSize: size of the render box.
+  /// 1. [renderBoxSize]: size of the render box.
   ///
-  /// 2. transformToGlobal: a matrix that maps the local paint coordinate system
-  /// to the [PipelineOwner.rootNode]
-  void setEditingLocationSize(Size renderBoxSize, Matrix4 transformToGlobal) {
-    // TODO(nturgut): Send web engine transform instead of topLeft-bottomRight.
-    Offset topLeft = MatrixUtils.transformPoint(transformToGlobal, Offset.zero);
-    Offset bottomRight = MatrixUtils.transformPoint(
-        transformToGlobal, renderBoxSize.bottomRight(Offset.zero)
-    );
-
-    double height = bottomRight.dy - topLeft.dy;
-    double width = bottomRight.dx - topLeft.dx;
+  /// 2. [transform]: a matrix that maps the local paint coordinate system
+  ///                 to the [PipelineOwner.rootNode].
+  void setEditableSizeAndTransform(Size renderBoxSize, Matrix4 transform) {
+    final List<double> transformList = List<double>(16);
+    transform.copyIntoArray(transformList);
 
     SystemChannels.textInput.invokeMethod(
-      'TextInput.setEditingLocationSize',
+      'TextInput.setEditableSizeAndTransform',
       <String, dynamic>{
-        'top': topLeft.dy,
-        'left': topLeft.dx,
-        'width': width,
-        'height': height,
+        'width': renderBoxSize.width,
+        'height': renderBoxSize.height,
+        'transform': transformList,
       },
     );
   }
@@ -709,9 +695,9 @@ class TextInputConnection {
       <String, dynamic>{
         'fontFamily': textStyle.fontFamily,
         'fontSize': textStyle.fontSize,
-        'fontWeightValue': textStyle.fontWeight?.index,
+        'fontWeightIndex': textStyle.fontWeight?.index,
         'textAlignIndex': textAlign.index,
-        if (textDirection != null) 'textDirection': textDirection,
+        'textDirectionIndex': textDirection.index,
       },
     );
   }
