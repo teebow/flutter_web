@@ -478,9 +478,10 @@ class PersistentTextEditingElement extends TextEditingElement {
     html.HtmlElement domElement, {
     @required html.VoidCallback onDomElementSwap,
   })  : _onDomElementSwap = onDomElementSwap,
-        // Make sure the dom element is of a type that we support for text editing.
-        assert(_getTypeFromElement(domElement) != null),
         super(owner) {
+    // Make sure the dom element is of a type that we support for text editing.
+    // TODO(yjbanov): move into initializer list when https://github.com/dart-lang/sdk/issues/37881 is fixed.
+    assert(_getTypeFromElement(domElement) != null);
     this.domElement = domElement;
   }
 
