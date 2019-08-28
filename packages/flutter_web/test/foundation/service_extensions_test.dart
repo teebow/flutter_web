@@ -638,7 +638,7 @@ void main() {
     // ...then increment this number.
     // TODO(flutter_web): upstream , 3 extensions are not supported for web.
     expect(binding.extensions.length, 26 + widgetInspectorExtensionCount
-      - (ui.isWeb ? 5 : 0));
+      - (ui.isWeb ? 3 : 0));
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;

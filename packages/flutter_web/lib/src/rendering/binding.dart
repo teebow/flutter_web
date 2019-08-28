@@ -6,7 +6,6 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
-import 'package:flutter_web_ui/ui.dart' as ui show isWeb;
 
 import 'package:flutter_web/foundation.dart';
 import 'package:flutter_web/gestures.dart';
@@ -79,19 +78,18 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         },
       );
 
-      if (!ui.isWeb) {
-        registerBoolServiceExtension(
-          name: 'repaintRainbow',
-          getter: () async => debugRepaintRainbowEnabled,
-          setter: (bool value) {
-            final bool repaint = debugRepaintRainbowEnabled && !value;
-            debugRepaintRainbowEnabled = value;
-            if (repaint)
-              return _forceRepaint();
-            return Future<void>.value();
-          },
-        );
-      }
+      registerBoolServiceExtension(
+        name: 'repaintRainbow',
+        getter: () async => debugRepaintRainbowEnabled,
+        setter: (bool value) {
+          final bool repaint = debugRepaintRainbowEnabled && !value;
+          debugRepaintRainbowEnabled = value;
+          if (repaint)
+            return _forceRepaint();
+          return Future<void>.value();
+        },
+      );
+
       registerSignalServiceExtension(
         name: 'debugDumpLayerTree',
         callback: () {

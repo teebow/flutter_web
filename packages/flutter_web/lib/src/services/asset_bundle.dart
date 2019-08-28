@@ -1,6 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// Synced. * Contains Web DELTA *
 
 import 'dart:async';
 import 'dart:html' show HttpRequest;
@@ -78,8 +79,8 @@ abstract class AssetBundle {
     //                calls with the caveat that one call may inherit static
     //                state from another call, and the app will likely use more
     //                memory due to having to keep a web-worker on stand-by.
-    // return compute(_utf8decode, data, debugLabel: 'UTF8 decode for "$key"');
-    return _utf8decode(data);
+    return compute(_utf8decode, data, debugLabel: 'UTF8 decode for "$key"');
+    //return _utf8decode(data);
   }
 
   static String _utf8decode(ByteData data) {

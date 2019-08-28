@@ -5,8 +5,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'package:flutter_web_ui/ui.dart' show AppLifecycleState, Locale, AccessibilityFeatures;
-import 'package:flutter_web_ui/ui.dart' as ui show isWeb, webOnlyIsInitialized;
+import 'package:flutter_web_ui/ui.dart' show AppLifecycleState, Locale, AccessibilityFeatures, webOnlyIsInitialized;
 
 import 'package:flutter_web/foundation.dart';
 import 'package:flutter_web/gestures.dart';
@@ -281,19 +280,17 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
         },
       );
 
-      if (!ui.isWeb) {
-        registerBoolServiceExtension(
-          name: 'showPerformanceOverlay',
-          getter: () =>
-          Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
-          setter: (bool value) {
-            if (WidgetsApp.showPerformanceOverlayOverride == value)
-              return Future<void>.value();
-            WidgetsApp.showPerformanceOverlayOverride = value;
-            return _forceRebuild();
-          },
-        );
-      }
+      registerBoolServiceExtension(
+        name: 'showPerformanceOverlay',
+        getter: () =>
+        Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
+        setter: (bool value) {
+          if (WidgetsApp.showPerformanceOverlayOverride == value)
+            return Future<void>.value();
+          WidgetsApp.showPerformanceOverlayOverride = value;
+          return _forceRebuild();
+        },
+      );
 
       registerServiceExtension(
         name: 'didSendFirstFrameEvent',
@@ -786,7 +783,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 ///  * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
 ///    ensure the widget, element, and render trees are all built.
 void runApp(Widget app) {
-  assert(ui.webOnlyIsInitialized,
+  assert(webOnlyIsInitialized,
     'The platform has not been initialized. '
     'It is required to call `ui.webOnlyInitializePlatform()` before `runApp`.');
   WidgetsFlutterBinding.ensureInitialized()
