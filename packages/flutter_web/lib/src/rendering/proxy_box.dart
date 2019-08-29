@@ -1,7 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// Synced. * Contains Web DELTA *
+// Synced 2019-08-29T13:53:33.973958.
 
 import 'dart:async';
 
@@ -12,8 +12,6 @@ import 'package:flutter_web/foundation.dart';
 import 'package:flutter_web/gestures.dart';
 import 'package:flutter_web/painting.dart';
 import 'package:flutter_web/semantics.dart';
-
-import 'package:flutter_web/src/util.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
@@ -964,6 +962,9 @@ class RenderShaderMask extends RenderProxyBox {
        _blendMode = blendMode,
        super(child);
 
+  @override
+  ShaderMaskLayer get layer => super.layer;
+
   /// Called to creates the [Shader] that generates the mask.
   ///
   /// The shader callback is called with the current size of the child so that
@@ -1001,14 +1002,12 @@ class RenderShaderMask extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      layer = context.pushShaderMask(
-        offset,
-        _shaderCallback(offset & size),
-        offset & size,
-        _blendMode,
-        super.paint,
-        oldLayer: layer,
-      );
+      layer ??= ShaderMaskLayer();
+      layer
+        ..shader = _shaderCallback(offset & size)
+        ..maskRect = offset & size
+        ..blendMode = _blendMode;
+      context.pushLayer(layer, super.paint, offset);
     } else {
       layer = null;
     }
@@ -1027,6 +1026,9 @@ class RenderBackdropFilter extends RenderProxyBox {
     : assert(filter != null),
       _filter = filter,
       super(child);
+
+  @override
+  BackdropFilterLayer get layer => super.layer;
 
   /// The image filter to apply to the existing painted content before painting
   /// the child.
@@ -1050,7 +1052,9 @@ class RenderBackdropFilter extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      layer = context.pushBackdropFilter(offset, _filter, super.paint, oldLayer: layer);
+      layer ??= BackdropFilterLayer();
+      layer.filter = _filter;
+      context.pushLayer(layer, super.paint, offset);
     } else {
       layer = null;
     }
@@ -1282,12 +1286,14 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] must not be null or [Clip.none].
   RenderClipRect({
     RenderBox child,
     CustomClipper<Rect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
+       super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   Rect get _defaultClip => Offset.zero & size;
@@ -1339,13 +1345,14 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   ///
   /// If [clipper] is non-null, then [borderRadius] is ignored.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipRRect({
     RenderBox child,
     BorderRadius borderRadius = BorderRadius.zero,
     CustomClipper<RRect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none),
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
        _borderRadius = borderRadius,
        super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
     assert(_borderRadius != null || clipper != null);
@@ -1415,12 +1422,13 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipOval({
     RenderBox child,
     CustomClipper<Rect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none),
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   Rect _cachedRect;
@@ -1493,12 +1501,13 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   /// consider using a [RenderClipRect], which can achieve the same effect more
   /// efficiently.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipPath({
     RenderBox child,
     CustomClipper<Path> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none),
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
@@ -1602,8 +1611,6 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     markNeedsPaint();
   }
 
-  static final Paint _transparentPaint = Paint()..color = const Color (0x00000000);
-
   @override
   bool get alwaysNeedsCompositing => true;
 
@@ -1617,8 +1624,8 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(DoubleProperty('elevation', elevation));
-    description.add(DiagnosticsProperty<Color>('color', color));
-    description.add(DiagnosticsProperty<Color>('shadowColor', color));
+    description.add(ColorProperty('color', color));
+    description.add(ColorProperty('shadowColor', color));
   }
 }
 
@@ -1631,8 +1638,9 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   ///
   /// The [color] is required.
   ///
-  /// The [shape], [elevation], [color], and [shadowColor] must not be null.
-  /// Additionally, the [elevation] must be non-negative.
+  /// The [shape], [elevation], [color], [clipBehavior], and [shadowColor]
+  /// arguments must not be null. Additionally, the [elevation] must be
+  /// non-negative.
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape = BoxShape.rectangle,
@@ -1655,6 +1663,9 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
          color: color,
          shadowColor: shadowColor
        );
+
+  @override
+  PhysicalModelLayer get layer => super.layer;
 
   /// The shape of the layer.
   ///
@@ -1735,36 +1746,20 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         }
         return true;
       }());
-      if (needsCompositing) {
-        layer = context.pushPhysicalModel(offset, offsetRRectAsPath, clipBehavior, paintShadows ? elevation : 0.0,
-            color, shadowColor, super.paint, childPaintBounds: offsetBounds, oldLayer: layer);
-        assert(() {
-          layer?.debugCreator = debugCreator;
-          return true;
-        }());
-      } else {
-        layer = null;
-        final Canvas canvas = context.canvas;
-        if (elevation != 0.0 && paintShadows) {
-          // The drawShadow call doesn't add the region of the shadow to the
-          // picture's bounds, so we draw a hardcoded amount of extra space to
-          // account for the maximum potential area of the shadow.
-          // TODO(jsimmons): remove this when Skia does it for us.
-          canvas.drawRect(
-            offsetBounds.inflate(20.0),
-            _RenderPhysicalModelBase._transparentPaint,
-          );
-          canvas.drawShadow(
-            offsetRRectAsPath,
-            shadowColor,
-            elevation,
-            color.alpha != 0xFF,
-          );
-        }
-        canvas.drawRRect(offsetRRect, Paint()..color = color);
-        context.clipRRectAndPaint(offsetRRect, clipBehavior, offsetBounds, () => super.paint(context, offset));
-        assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
-      }
+      layer ??= PhysicalModelLayer();
+      layer
+        ..clipPath = offsetRRectAsPath
+        ..clipBehavior = clipBehavior
+        ..elevation = paintShadows ? elevation : 0.0
+        ..color = color
+        ..shadowColor = shadowColor;
+      context.pushLayer(layer, super.paint, offset, childPaintBounds: offsetBounds);
+      assert(() {
+        layer.debugCreator = debugCreator;
+        return true;
+      }());
+    } else {
+      layer = null;
     }
   }
 
@@ -1812,6 +1807,9 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
        );
 
   @override
+  PhysicalModelLayer get layer => super.layer;
+
+  @override
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
 
   @override
@@ -1847,36 +1845,20 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
         }
         return true;
       }());
-      if (needsCompositing) {
-        layer = context.pushPhysicalModel(offset, offsetPath, clipBehavior, paintShadows ? elevation : 0.0,
-            color, shadowColor, super.paint, childPaintBounds: offsetBounds, oldLayer: layer);
-        assert(() {
-          layer?.debugCreator = debugCreator;
-          return true;
-        }());
-      } else {
-        layer = null;
-        final Canvas canvas = context.canvas;
-        if (elevation != 0.0 && paintShadows) {
-          // The drawShadow call doesn't add the region of the shadow to the
-          // picture's bounds, so we draw a hardcoded amount of extra space to
-          // account for the maximum potential area of the shadow.
-          // TODO(jsimmons): remove this when Skia does it for us.
-          canvas.drawRect(
-            offsetBounds.inflate(20.0),
-            _RenderPhysicalModelBase._transparentPaint,
-          );
-          canvas.drawShadow(
-            offsetPath,
-            shadowColor,
-            elevation,
-            color.alpha != 0xFF,
-          );
-        }
-        canvas.drawPath(offsetPath, Paint()..color = color..style = PaintingStyle.fill);
-        context.clipPathAndPaint(offsetPath, clipBehavior, offsetBounds, () => super.paint(context, offset));
-        assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
-      }
+      layer ??= PhysicalModelLayer();
+      layer
+        ..clipPath = offsetPath
+        ..clipBehavior = clipBehavior
+        ..elevation = paintShadows ? elevation : 0.0
+        ..color = color
+        ..shadowColor = shadowColor;
+      context.pushLayer(layer, super.paint, offset, childPaintBounds: offsetBounds);
+      assert(() {
+        layer.debugCreator = debugCreator;
+        return true;
+      }());
+    } else {
+      layer = null;
     }
   }
 
@@ -2201,13 +2183,6 @@ class RenderTransform extends RenderProxyBox {
     );
   }
 
-  // TODO(flutter_web): Canvas.pushTransform doesn't correctly handle save/restore
-  // for transform yet, so we force a composited layer to get fidelity. Once
-  // supported switch to the default alwaysNeedsCompositing to prevent extra
-  // layer. For tests to stay in sync, use non-layer code path.
-  @override
-  bool get alwaysNeedsCompositing => !debugIsInTest;
-
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
@@ -2219,8 +2194,6 @@ class RenderTransform extends RenderProxyBox {
         super.paint(context, offset + childOffset);
         layer = null;
       }
-    } else {
-      layer = null;
     }
   }
 
@@ -2363,7 +2336,8 @@ class RenderFittedBox extends RenderProxyBox {
   TransformLayer _paintChildWithTransform(PaintingContext context, Offset offset) {
     final Offset childOffset = MatrixUtils.getAsTranslation(_transform);
     if (childOffset == null)
-      return context.pushTransform(needsCompositing, offset, _transform, super.paint, oldLayer: layer is TransformLayer ? layer : null);
+      return context.pushTransform(needsCompositing, offset, _transform, super.paint,
+          oldLayer: layer is TransformLayer ? layer : null);
     else
       super.paint(context, offset + childOffset);
     return null;
@@ -2376,17 +2350,16 @@ class RenderFittedBox extends RenderProxyBox {
     _updatePaintData();
     if (child != null) {
       if (_hasVisualOverflow)
-        layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform, oldLayer: layer is ClipRectLayer ? layer : null);
+        layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform,
+            oldLayer: layer is ClipRectLayer ? layer : null);
       else
         layer = _paintChildWithTransform(context, offset);
-    } else {
-      layer = null;
     }
   }
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    if (size.isEmpty)
+    if (size.isEmpty || child?.size?.isEmpty == true)
       return false;
     _updatePaintData();
     return result.addWithPaintTransform(
@@ -2400,7 +2373,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    if (size.isEmpty) {
+    if (size.isEmpty || child.size.isEmpty) {
       transform.setZero();
     } else {
       _updatePaintData();
@@ -2781,6 +2754,7 @@ class RenderMouseRegion extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_annotationIsActive) {
+      // Annotated region layers are not retained because they do not create engine layers.
       final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
         _hoverAnnotation,
         size: size,
@@ -2907,7 +2881,6 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   Future<ui.Image> toImage({ double pixelRatio = 1.0 }) {
     assert(!debugNeedsPaint);
-    assert(layer is OffsetLayer);
     final OffsetLayer offsetLayer = layer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
@@ -3067,7 +3040,7 @@ class RenderIgnorePointer extends RenderProxyBox {
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
-    return ignoring ? false : super.hitTest(result, position: position);
+    return !ignoring && super.hitTest(result, position: position);
   }
 
   // TODO(ianh): figure out a way to still include labels and flags in
@@ -3563,55 +3536,55 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     VoidCallback onDidLoseAccessibilityFocus,
     Map<CustomSemanticsAction, VoidCallback> customSemanticsActions,
   }) : assert(container != null),
-        _container = container,
-        _explicitChildNodes = explicitChildNodes,
-        _excludeSemantics = excludeSemantics,
-        _enabled = enabled,
-        _checked = checked,
-        _toggled = toggled,
-        _selected = selected,
-        _button = button,
-        _header = header,
-        _textField = textField,
-        _readOnly = readOnly,
-        _focused = focused,
-        _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
-        _obscured = obscured,
-        _multiline = multiline,
-        _scopesRoute = scopesRoute,
-        _namesRoute = namesRoute,
-        _liveRegion = liveRegion,
-        _hidden = hidden,
-        _image = image,
-        _onDismiss = onDismiss,
-        _label = label,
-        _value = value,
-        _increasedValue = increasedValue,
-        _decreasedValue = decreasedValue,
-        _hint = hint,
-        _hintOverrides = hintOverrides,
-        _textDirection = textDirection,
-        _sortKey = sortKey,
-        _onTap = onTap,
-        _onLongPress = onLongPress,
-        _onScrollLeft = onScrollLeft,
-        _onScrollRight = onScrollRight,
-        _onScrollUp = onScrollUp,
-        _onScrollDown = onScrollDown,
-        _onIncrease = onIncrease,
-        _onDecrease = onDecrease,
-        _onCopy = onCopy,
-        _onCut = onCut,
-        _onPaste = onPaste,
-        _onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter,
-        _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
-        _onMoveCursorForwardByWord = onMoveCursorForwardByWord,
-        _onMoveCursorBackwardByWord = onMoveCursorBackwardByWord,
-        _onSetSelection = onSetSelection,
-        _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
-        _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
-        _customSemanticsActions = customSemanticsActions,
-        super(child);
+       _container = container,
+       _explicitChildNodes = explicitChildNodes,
+       _excludeSemantics = excludeSemantics,
+       _enabled = enabled,
+       _checked = checked,
+       _toggled = toggled,
+       _selected = selected,
+       _button = button,
+       _header = header,
+       _textField = textField,
+       _readOnly = readOnly,
+       _focused = focused,
+       _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
+       _obscured = obscured,
+       _multiline = multiline,
+       _scopesRoute = scopesRoute,
+       _namesRoute = namesRoute,
+       _liveRegion = liveRegion,
+       _hidden = hidden,
+       _image = image,
+       _onDismiss = onDismiss,
+       _label = label,
+       _value = value,
+       _increasedValue = increasedValue,
+       _decreasedValue = decreasedValue,
+       _hint = hint,
+       _hintOverrides = hintOverrides,
+       _textDirection = textDirection,
+       _sortKey = sortKey,
+       _onTap = onTap,
+       _onLongPress = onLongPress,
+       _onScrollLeft = onScrollLeft,
+       _onScrollRight = onScrollRight,
+       _onScrollUp = onScrollUp,
+       _onScrollDown = onScrollDown,
+       _onIncrease = onIncrease,
+       _onDecrease = onDecrease,
+       _onCopy = onCopy,
+       _onCut = onCut,
+       _onPaste = onPaste,
+       _onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter,
+       _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
+       _onMoveCursorForwardByWord = onMoveCursorForwardByWord,
+       _onMoveCursorBackwardByWord = onMoveCursorBackwardByWord,
+       _onSetSelection = onSetSelection,
+       _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
+       _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
+       _customSemanticsActions = customSemanticsActions,
+       super(child);
 
   /// If 'container' is true, this [RenderObject] will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
@@ -4357,9 +4330,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
     assert((scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
-    'explicitChildNodes must be set to true if scopes route is true');
+      'explicitChildNodes must be set to true if scopes route is true');
     assert(!(toggled == true && checked == true),
-    'A semantics node cannot be toggled and checked at the same time');
+      'A semantics node cannot be toggled and checked at the same time');
 
     if (enabled != null)
       config.isEnabled = enabled;
@@ -4734,7 +4707,16 @@ class RenderLeaderLayer extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    layer = context.pushLeader(offset, link, super.paint, oldLayer: layer);
+    if (layer == null) {
+      layer = LeaderLayer(link: link, offset: offset);
+    } else {
+      final LeaderLayer leaderLayer = layer;
+      leaderLayer
+        ..link = link
+        ..offset = offset;
+    }
+    context.pushLayer(layer, super.paint, Offset.zero);
+    assert(layer != null);
   }
 
   @override
@@ -4864,13 +4846,24 @@ class RenderFollowerLayer extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(showWhenUnlinked != null);
-    layer = context.pushFollower(
-      this.offset,
-      offset,
-      link,
-      showWhenUnlinked,
+    if (layer == null) {
+      layer = FollowerLayer(
+        link: link,
+        showWhenUnlinked: showWhenUnlinked,
+        linkedOffset: this.offset,
+        unlinkedOffset: offset,
+      );
+    } else {
+      layer
+        ..link = link
+        ..showWhenUnlinked = showWhenUnlinked
+        ..linkedOffset = this.offset
+        ..unlinkedOffset = offset;
+    }
+    context.pushLayer(
+      layer,
       super.paint,
-      oldLayer: layer,
+      Offset.zero,
       childPaintBounds: const Rect.fromLTRB(
         // We don't know where we'll end up, so we have no idea what our cull rect should be.
         double.negativeInfinity,
@@ -4946,6 +4939,7 @@ class RenderAnnotatedRegion<T> extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    // Annotated region layers are not retained because they do not create engine layers.
     final AnnotatedRegionLayer<T> layer = AnnotatedRegionLayer<T>(
       value,
       size: sized ? size : null,
