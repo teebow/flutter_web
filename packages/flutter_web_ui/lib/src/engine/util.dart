@@ -238,3 +238,27 @@ String _pathToSvgClipPath(ui.Path path,
 bool _isNsErrorFailureException(dynamic e) {
   return js_util.getProperty(e, 'name') == 'NS_ERROR_FAILURE';
 }
+
+/// To properly handle font names with spaces or punctuation, we must quote
+/// the font name. However, you cannot quote 'generic families', which are
+/// CSS built-ins.
+///
+/// See https://www.w3.org/TR/2018/REC-css-fonts-3-20180920/#propdef-font-family
+///
+/// > The following generic family keywords are defined: ‘serif’, ‘sans-serif’,
+/// > ‘cursive’, ‘fantasy’, and ‘monospace’. These keywords can be used as a
+/// > general fallback mechanism when an author's desired font choices are not
+/// > available. As keywords, they must not be quoted.
+String _quoteFontUnlessGeneric(String font) {
+  const List<String> genericFamilies = <String>[
+    'serif',
+    'sans-serif',
+    'cursive',
+    'fantasy',
+    'monospace',
+  ];
+  if (genericFamilies.contains(font)) {
+    return font;
+  }
+  return '"$font"';
+}
