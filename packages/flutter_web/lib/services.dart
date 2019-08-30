@@ -4,6 +4,7 @@
 // Synced 2019-05-30T14:20:56.115631.
 
 export 'src/services/asset_bundle.dart';
+export 'src/services/binary_messenger.dart';
 export 'src/services/binding.dart';
 export 'src/services/clipboard.dart';
 export 'src/services/haptic_feedback.dart';

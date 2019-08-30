@@ -4,13 +4,14 @@
 
 import 'dart:async';
 import 'dart:typed_data';
-
 import 'package:flutter_web_ui/ui.dart';
 
 import 'package:flutter_web/foundation.dart';
+import 'package:flutter_web/gestures.dart';
 
 import 'message_codec.dart';
 import 'system_channels.dart';
+
 /// The [PlatformViewsRegistry] responsible for generating unique identifiers for platform views.
 final PlatformViewsRegistry platformViewsRegistry = PlatformViewsRegistry._instance();
 
@@ -166,23 +167,6 @@ class PlatformViewsService {
     }
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
     return UiKitViewController._(id, layoutDirection);
-  }
-
-  // TODO(flutter_web): Upstream this.
-  static HtmlViewController initHtmlView({
-    @required int id,
-    @required String viewType,
-    @required TextDirection layoutDirection,
-  }) {
-    assert (id != null);
-    assert(viewType != null);
-    assert(layoutDirection != null);
-    final HtmlViewController controller = HtmlViewController._(
-      id,
-      viewType,
-      layoutDirection,
-    );
-    return controller;
   }
 }
 
@@ -440,7 +424,7 @@ class AndroidMotionEvent {
   }
 }
 
-enum _PlatformViewState {
+enum _AndroidViewState {
   waitingForSize,
   creating,
   created,
@@ -466,7 +450,7 @@ class AndroidViewController {
       _creationParams = creationParams,
       _creationParamsCodec = creationParamsCodec,
       _layoutDirection = layoutDirection,
-      _state = _PlatformViewState.waitingForSize;
+      _state = _AndroidViewState.waitingForSize;
 
   /// Action code for when a primary pointer touched the screen.
   ///
@@ -520,28 +504,28 @@ class AndroidViewController {
 
   TextDirection _layoutDirection;
 
-  _PlatformViewState _state;
+  _AndroidViewState _state;
 
-  dynamic _creationParams;
+  final dynamic _creationParams;
 
-  MessageCodec<dynamic> _creationParamsCodec;
+  final MessageCodec<dynamic> _creationParamsCodec;
 
   final List<PlatformViewCreatedCallback> _platformViewCreatedCallbacks = <PlatformViewCreatedCallback>[];
 
   /// Whether the platform view has already been created.
-  bool get isCreated => _state == _PlatformViewState.created;
+  bool get isCreated => _state == _AndroidViewState.created;
 
   /// Adds a callback that will get invoke after the platform view has been
   /// created.
   void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
     assert(listener != null);
-    assert(_state != _PlatformViewState.disposed);
+    assert(_state != _AndroidViewState.disposed);
     _platformViewCreatedCallbacks.add(listener);
   }
 
   /// Removes a callback added with [addOnPlatformViewCreatedListener].
   void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
-    assert(_state != _PlatformViewState.disposed);
+    assert(_state != _AndroidViewState.disposed);
     _platformViewCreatedCallbacks.remove(listener);
   }
 
@@ -551,10 +535,10 @@ class AndroidViewController {
   /// The identifier of the platform view cannot be reused after the view is
   /// disposed.
   Future<void> dispose() async {
-    if (_state == _PlatformViewState.creating || _state == _PlatformViewState.created)
+    if (_state == _AndroidViewState.creating || _state == _AndroidViewState.created)
       await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
     _platformViewCreatedCallbacks.clear();
-    _state = _PlatformViewState.disposed;
+    _state = _AndroidViewState.disposed;
   }
 
   /// Sizes the Android View.
@@ -564,12 +548,12 @@ class AndroidViewController {
   ///
   /// The first time a size is set triggers the creation of the Android view.
   Future<void> setSize(Size size) async {
-    assert(_state != _PlatformViewState.disposed, 'trying to size a disposed Android View. View id: $id');
+    assert(_state != _AndroidViewState.disposed, 'trying to size a disposed Android View. View id: $id');
 
     assert(size != null);
     assert(!size.isEmpty);
 
-    if (_state == _PlatformViewState.waitingForSize)
+    if (_state == _AndroidViewState.waitingForSize)
       return _create(size);
 
     await SystemChannels.platform_views.invokeMethod<void>('resize', <String, dynamic>{
@@ -581,7 +565,7 @@ class AndroidViewController {
 
   /// Sets the layout direction for the Android view.
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
-    assert(_state != _PlatformViewState.disposed,'trying to set a layout direction for a disposed UIView. View id: $id');
+    assert(_state != _AndroidViewState.disposed,'trying to set a layout direction for a disposed UIView. View id: $id');
 
     if (layoutDirection == _layoutDirection)
       return;
@@ -591,7 +575,7 @@ class AndroidViewController {
 
     // If the view was not yet created we just update _layoutDirection and return, as the new
     // direction will be used in _create.
-    if (_state == _PlatformViewState.waitingForSize)
+    if (_state == _AndroidViewState.waitingForSize)
       return;
 
     await SystemChannels.platform_views.invokeMethod<void>('setDirection', <String, dynamic>{
@@ -602,7 +586,7 @@ class AndroidViewController {
 
   /// Clears the focus from the Android View if it is focused.
   Future<void> clearFocus() {
-    if (_state != _PlatformViewState.created) {
+    if (_state != _AndroidViewState.created) {
       return null;
     }
     return SystemChannels.platform_views.invokeMethod<void>('clearFocus', id);
@@ -654,7 +638,7 @@ class AndroidViewController {
       );
     }
     _textureId = await SystemChannels.platform_views.invokeMethod('create', args);
-    _state = _PlatformViewState.created;
+    _state = _AndroidViewState.created;
     for (PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
       callback(id);
     }
@@ -731,141 +715,26 @@ class UiKitViewController {
   }
 }
 
-// TODO(flutter_web): Upstream this.
-/// Controls an HTML view.
+/// An interface for a controlling a single platform view.
 ///
-/// Typically created with [PlatformViewsService.initHtmlView].
-class HtmlViewController {
-  HtmlViewController._(
-    this.id,
-    String viewType,
-    TextDirection layoutDirection,
-  ) : assert(id != null),
-      assert(viewType != null),
-      assert(layoutDirection != null),
-      _viewType = viewType,
-      _layoutDirection = layoutDirection,
-      _state = _PlatformViewState.waitingForSize;
+/// Used by [PlatformViewSurface] to interface with the platform view it embeds.
+abstract class PlatformViewController {
 
-  /// The unique identifier of the HTML view controlled by this controller.
-  final int id;
-
-  final String _viewType;
-
-  TextDirection _layoutDirection;
-
-  _PlatformViewState _state;
-
-  final List<PlatformViewCreatedCallback> _platformViewCreatedCallbacks = <PlatformViewCreatedCallback>[];
-
-  /// Whether the platform view has already been created.
-  bool get isCreated => _state == _PlatformViewState.created;
-
-  /// Adds a callback that will get invoke after the platform view has been
-  /// created.
-  void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
-    assert(listener != null);
-    assert(_state != _PlatformViewState.disposed);
-    _platformViewCreatedCallbacks.add(listener);
-  }
-
-  /// Removes a callback added with [addOnPlatformViewCreatedListener].
-  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
-    assert(_state != _PlatformViewState.disposed);
-    _platformViewCreatedCallbacks.remove(listener);
-  }
-
-  /// Accept an active gesture.
+  /// The viewId associated with this controller.
   ///
-  /// When a touch sequence is happening on the embedded HTML all touch events are delayed.
-  /// Calling this method releases the delayed events to the embedded HTML and makes it consume
-  /// any following touch events for the pointers involved in the active gesture.
-  Future<void> acceptGesture() {
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': id,
-    };
-    return SystemChannels.platform_views.invokeMethod('acceptGesture', args);
-  }
-
-  /// Rejects an active gesture.
+  /// The viewId should always be unique and non-negative. And it must not be null.
   ///
-  /// When a touch sequence is happening on the embedded HTML all touch events are delayed.
-  /// Calling this method drops the buffered touch events and prevents any future touch events for
-  /// the pointers that are part of the active touch sequence from arriving to the embedded view.
-  Future<void> rejectGesture() {
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': id,
-    };
-    return SystemChannels.platform_views.invokeMethod('rejectGesture', args);
-  }
+  /// See also [PlatformViewRegistry] which is a helper for managing platform view ids.
+  int get viewId;
 
-  /// Disposes the HTML view.
+  /// Dispatches the `event` to the platform view.
+  void dispatchPointerEvent(PointerEvent event);
+
+  /// Disposes the platform view.
   ///
-  /// The [HtmlViewController] object is unusable after calling this.
-  /// The identifier of the platform view cannot be reused after the view is
-  /// disposed.
-  Future<void> dispose() async {
-    if (_state == _PlatformViewState.creating || _state == _PlatformViewState.created)
-      await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
-    _platformViewCreatedCallbacks.clear();
-    _state = _PlatformViewState.disposed;
-  }
+  /// The [PlatformViewController] is unusable after calling dispose.
+  void dispose();
 
-  /// Sizes the HTML View.
-  ///
-  /// `size` is the view's new size in logical pixel, it must not be null and must
-  /// be bigger than zero.
-  ///
-  /// The first time a size is set triggers the creation of the HTML view.
-  Future<void> setSize(Size size) async {
-    assert(_state != _PlatformViewState.disposed, 'trying to size a disposed HTML View. View id: $id');
-
-    assert(size != null);
-    assert(!size.isEmpty);
-
-    if (_state == _PlatformViewState.waitingForSize)
-      return _create(size);
-
-    await SystemChannels.platform_views.invokeMethod<void>('resize', <String, dynamic>{
-      'id': id,
-      'width': size.width,
-      'height': size.height,
-    });
-  }
-
-  /// Sets the layout direction for the HTML view.
-  Future<void> setLayoutDirection(TextDirection layoutDirection) async {
-    assert(_state != _PlatformViewState.disposed, 'trying to set a layout direction for a disposed HTML View. View id: $id');
-
-    if (layoutDirection == _layoutDirection)
-      return;
-
-    assert(layoutDirection != null);
-    _layoutDirection = layoutDirection;
-
-    // If the view was not yet created we just update _layoutDirection and return, as the new
-    // direction will be used in _create.
-    if (_state == _PlatformViewState.waitingForSize)
-      return;
-
-    await SystemChannels.platform_views.invokeMethod<void>('setDirection', <String, dynamic>{
-      'id': id,
-      'direction': layoutDirection == TextDirection.ltr ? 0 : 1,
-    });
-  }
-
-  Future<void> _create(Size size) async {
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': id,
-      'viewType': _viewType,
-      'width': size.width,
-      'height': size.height,
-      'direction': _layoutDirection == TextDirection.ltr ? 0 : 1,
-    };
-    await SystemChannels.platform_views.invokeMethod('create', args);
-    _state = _PlatformViewState.created;
-    for (PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
-      callback(id);
-    }
-  }
+  /// Clears the view's focus on the platform side.
+  void clearFocus();
 }

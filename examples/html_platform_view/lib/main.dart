@@ -22,7 +22,7 @@ void main() {
     child: SizedBox(
       width: 640,
       height: 360,
-      child: HtmlView(viewType: 'hello-world-html'),
+      child: HtmlElementView(viewType: 'hello-world-html'),
     ),
   ));
 }
