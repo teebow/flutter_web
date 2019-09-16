@@ -5,6 +5,10 @@ Welcome to the code repository for [Flutter for web](https://flutter.dev/web).
 
 For quick answers check out our [FAQ](https://github.com/flutter/flutter_web/blob/master/docs/faq.md).
 
+You can give this example a try in Gitpod, a free online dev environment service.
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/svenefftinge/flutter_web)
+
 This repository contains the source code for a fork of
 [Flutter](https://flutter.dev/) that targets the web. Our goal is to add web
 support as a first-tier platform in the Flutter SDK alongside iOS and Android.
