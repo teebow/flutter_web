@@ -1,5 +1,5 @@
 image:
-  file: Dockerfile
+  file: .gitpod.Dockerfile
 workspaceLocation: flutter_web/examples/hello_world
 tasks:
 - init: >
@@ -9,7 +9,7 @@ tasks:
     webdev serve --release
 ports:
 - port: 8080
-  onOpen: openPreview
+  onOpen: open-preview
 vscode:
   extensions:
     - Dart-Code.dart-code@3.4.1:D5Ni/AB9J3ezSard6+nUOw==
