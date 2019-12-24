@@ -22,7 +22,7 @@ void main() {
             // });
           },
           countDownTimerStyle: TextStyle(
-              color: Colors.red.shade800, fontSize: 48.0, height: 1.2),
+              color: Colors.orange, fontSize: 48.0, height: 1.2),
         ),
       ],
     ),
